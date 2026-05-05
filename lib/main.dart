@@ -1,4 +1,5 @@
 
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -461,15 +462,15 @@ class PlannerState extends ChangeNotifier {
 
   Future<void> initSystem() async {
     final prefs = await SharedPreferences.getInstance();
-    final usersJson = prefs.getString('sys_users_v8');
+    final usersJson = prefs.getString('sys_users_v9');
     if (usersJson != null) {
       _users = (jsonDecode(usersJson) as List).map((u) => UserProfile.fromJson(u)).toList();
     }
     if (_users.isEmpty) {
       _users.add(UserProfile(id: 'usr_${DateTime.now().millisecondsSinceEpoch}', name: 'OPERATOR_01', customSubjects:[], customChapters: {}));
-      await prefs.setString('sys_users_v8', jsonEncode(_users.map((u) => u.toJson()).toList()));
+      await prefs.setString('sys_users_v9', jsonEncode(_users.map((u) => u.toJson()).toList()));
     }
-    final lastUserId = prefs.getString('last_user_id_v8') ?? _users.first.id;
+    final lastUserId = prefs.getString('last_user_id_v9') ?? _users.first.id;
     _currentUser = _users.firstWhere((u) => u.id == lastUserId, orElse: () => _users.first);
     await loadUserData(_currentUser!.id);
 
@@ -488,35 +489,48 @@ class PlannerState extends ChangeNotifier {
     bool requiresOverlapResolve = false;
     Set<String> affectedDays = {};
 
+    // 1. Math update for Active sessions
+    for (var s in _sessions.where((s) => s.status == SessionStatus.active)) {
+      int totalSecsSinceStart = (nowMs - s.scheduledStartTime) ~/ 1000;
+      if (totalSecsSinceStart < 0) totalSecsSinceStart = 0; 
+
+      if (s.isPaused) {
+        int newPaused = totalSecsSinceStart - s.elapsedSeconds;
+        if (newPaused > s.pausedSeconds) {
+          s.pausedSeconds = newPaused;
+          needsSave = true;
+          requiresOverlapResolve = true;
+          affectedDays.add(s.dateId);
+        }
+      } else {
+        int newElapsed = totalSecsSinceStart - s.pausedSeconds;
+        if (newElapsed > s.elapsedSeconds) {
+          s.elapsedSeconds = newElapsed;
+          needsSave = true;
+          
+          if (s.elapsedSeconds >= s.durationMinutes * 60) {
+            s.status = SessionStatus.completed;
+            s.completionTime = s.scheduledStartTime + (s.durationMinutes * 60 * 1000) + (s.pausedSeconds * 1000);
+            s.elapsedSeconds = s.durationMinutes * 60; 
+            requiresOverlapResolve = true;
+            affectedDays.add(s.dateId);
+          }
+        }
+      }
+    }
+
+    // 2. Resolve Overlaps BEFORE activating new sessions
+    if (requiresOverlapResolve) {
+      for (var dayId in affectedDays) _resolveOverlapsForDay(dayId);
+    }
+
+    // 3. Activate Scheduled sessions
     for (var s in _sessions.where((s) => s.status == SessionStatus.scheduled)) {
       if (nowMs >= s.scheduledStartTime) {
         s.status = SessionStatus.active;
         s.isPaused = false;
         needsSave = true;
       }
-    }
-
-    for (var s in _sessions.where((s) => s.status == SessionStatus.active)) {
-      if (s.isPaused) {
-        s.pausedSeconds++;
-        needsSave = true;
-        requiresOverlapResolve = true;
-        affectedDays.add(s.dateId);
-      } else {
-        s.elapsedSeconds++;
-        needsSave = true;
-        // Strict required time check (Even in Bonus mode)
-        if (s.elapsedSeconds >= s.durationMinutes * 60) {
-          s.status = SessionStatus.completed;
-          s.completionTime = nowMs;
-          requiresOverlapResolve = true;
-          affectedDays.add(s.dateId);
-        }
-      }
-    }
-
-    if (requiresOverlapResolve) {
-      for (var dayId in affectedDays) _resolveOverlapsForDay(dayId);
     }
 
     if (needsSave) {
@@ -545,7 +559,7 @@ class PlannerState extends ChangeNotifier {
         }
       } else {
         if (currEnd > next.scheduledStartTime && next.status == SessionStatus.scheduled) {
-          next.scheduledStartTime = currEnd + 60000; // Exact 1 min gap ONLY when overlapping dynamically
+          next.scheduledStartTime = currEnd + 60000; 
         }
       }
     }
@@ -565,13 +579,13 @@ class PlannerState extends ChangeNotifier {
 
   Future<void> loadUserData(String uid) async {
     final prefs = await SharedPreferences.getInstance();
-    final sJson = prefs.getString('sessions_v8_$uid');
+    final sJson = prefs.getString('sessions_v9_$uid');
     _sessions = sJson != null ? (jsonDecode(sJson) as List).map((s) => StudySession.fromJson(s)).toList() :[];
 
-    final dJson = prefs.getString('days_v8_$uid');
+    final dJson = prefs.getString('days_v9_$uid');
     if (dJson != null) _days = (jsonDecode(dJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v))); else _days = {};
 
-    final wJson = prefs.getString('weeks_v8_$uid');
+    final wJson = prefs.getString('weeks_v9_$uid');
     if (wJson != null) _weeks = (jsonDecode(wJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v))); else _weeks = {};
 
     _isLoading = false;
@@ -582,23 +596,23 @@ class PlannerState extends ChangeNotifier {
     if (_currentUser == null) return;
     final uid = _currentUser!.id;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sessions_v8_$uid', jsonEncode(_sessions.map((s) => s.toJson()).toList()));
-    await prefs.setString('days_v8_$uid', jsonEncode(_days.map((k, v) => MapEntry(k, v.toJson()))));
-    await prefs.setString('weeks_v8_$uid', jsonEncode(_weeks.map((k, v) => MapEntry(k, v.toJson()))));
+    await prefs.setString('sessions_v9_$uid', jsonEncode(_sessions.map((s) => s.toJson()).toList()));
+    await prefs.setString('days_v9_$uid', jsonEncode(_days.map((k, v) => MapEntry(k, v.toJson()))));
+    await prefs.setString('weeks_v9_$uid', jsonEncode(_weeks.map((k, v) => MapEntry(k, v.toJson()))));
   }
 
   Future<void> switchUser(String id) async {
     _isLoading = true; notifyListeners();
     _currentUser = _users.firstWhere((u) => u.id == id);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_user_id_v8', _currentUser!.id);
+    await prefs.setString('last_user_id_v9', _currentUser!.id);
     await loadUserData(_currentUser!.id);
   }
 
   Future<void> createUser(String name) async {
     _users.add(UserProfile(id: 'usr_${DateTime.now().millisecondsSinceEpoch}', name: name, customSubjects:[], customChapters: {}));
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sys_users_v8', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    await prefs.setString('sys_users_v9', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
   }
 
@@ -608,7 +622,7 @@ class PlannerState extends ChangeNotifier {
       int idx = _users.indexWhere((u) => u.id == _currentUser!.id);
       if (idx != -1) _users[idx] = _currentUser!;
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('sys_users_v8', jsonEncode(_users.map((u) => u.toJson()).toList()));
+      await prefs.setString('sys_users_v9', jsonEncode(_users.map((u) => u.toJson()).toList()));
       notifyListeners();
     }
   }
@@ -618,7 +632,7 @@ class PlannerState extends ChangeNotifier {
     _currentUser!.customSubjects.add(sub);
     _currentUser!.customChapters[sub] =[];
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sys_users_v8', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    await prefs.setString('sys_users_v9', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
   }
 
@@ -627,7 +641,7 @@ class PlannerState extends ChangeNotifier {
     _currentUser!.customSubjects.remove(sub);
     _currentUser!.customChapters.remove(sub);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sys_users_v8', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    await prefs.setString('sys_users_v9', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
   }
 
@@ -637,7 +651,7 @@ class PlannerState extends ChangeNotifier {
     if (_currentUser!.customChapters[sub]!.contains(chap)) return;
     _currentUser!.customChapters[sub]!.add(chap);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sys_users_v8', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    await prefs.setString('sys_users_v9', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
   }
 
@@ -646,7 +660,7 @@ class PlannerState extends ChangeNotifier {
     if (_currentUser!.customChapters.containsKey(sub)) {
       _currentUser!.customChapters[sub]!.remove(chap);
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('sys_users_v8', jsonEncode(_users.map((u) => u.toJson()).toList()));
+      await prefs.setString('sys_users_v9', jsonEncode(_users.map((u) => u.toJson()).toList()));
       notifyListeners();
     }
   }
@@ -737,7 +751,7 @@ class PlannerState extends ChangeNotifier {
   }
 
   PlanNode getDayPlan(String dateId) {
-    if (!_days.containsKey(dateId)) _days[dateId] = PlanNode(id: dateId, customName: '', overallGoals:[], overallRemarks: []);
+    if (!_days.containsKey(dateId)) _days[dateId] = PlanNode(id: dateId, customName: '', overallGoals:[], overallRemarks:[]);
     return _days[dateId]!;
   }
   void updateDayPlan(PlanNode plan) { _days[plan.id] = plan; triggerUpdate(); }
@@ -1205,7 +1219,7 @@ class _SessionEditorScreenState extends State<SessionEditorScreen> {
     final state = context.watch<PlannerState>();
     bool isLocked = widget.existing != null && widget.existing!.status != SessionStatus.scheduled;
     if (_subject == null && state.availableSubjects.isNotEmpty) _subject = state.availableSubjects.first;
-    List<String> chapters = _subject != null ? state.getChaptersForSubject(_subject!) :['General'];
+    List<String> chapters = _subject != null ? state.getChaptersForSubject(_subject!) : ['General'];
     if (_chapter == null || !chapters.contains(_chapter)) _chapter = chapters.first;
 
     return Scaffold(
