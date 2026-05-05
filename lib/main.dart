@@ -270,7 +270,7 @@ class _DoubleTapLockIconState extends State<DoubleTapLockIcon> {
   bool _primed = false;
   Timer? _timer;
   void _handleTap() {
-    if (widget.isLocked) return; // Cannot unlock once locked. 
+    if (widget.isLocked) return; 
     if (_primed) {
       _timer?.cancel();
       setState(() => _primed = false);
@@ -366,7 +366,10 @@ class VisualTileBuilder extends StatelessWidget {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children:[
-              if (isGoal) DoubleTapLockIcon(isLocked: goal!.isLocked, onLockConfirm: () => state.lockGoal(goal!)),
+              if (isGoal) DoubleTapLockIcon(isLocked: goal!.isLocked, onLockConfirm: () {
+                goal!.isLocked = true;
+                state.triggerUpdate();
+              }),
               IconButton(icon: const Icon(Icons.delete_outline, color: rustRed), onPressed: () => _confirmDelete(context, state, isGoal, isGoal ? goal : remark)),
             ],
           )
@@ -429,20 +432,25 @@ class PlannerState extends ChangeNotifier {
 
   Future<void> initSystem() async {
     final prefs = await SharedPreferences.getInstance();
-    final usersJson = prefs.getString('sys_users_v7');
+    final usersJson = prefs.getString('sys_users_v8');
     if (usersJson != null) {
       _users = (jsonDecode(usersJson) as List).map((u) => UserProfile.fromJson(u)).toList();
     }
     if (_users.isEmpty) {
       _users.add(UserProfile(id: 'usr_${DateTime.now().millisecondsSinceEpoch}', name: 'OPERATOR_01', customSubjects:[], customChapters: {}));
-      await prefs.setString('sys_users_v7', jsonEncode(_users.map((u) => u.toJson()).toList()));
+      await prefs.setString('sys_users_v8', jsonEncode(_users.map((u) => u.toJson()).toList()));
     }
-    final lastUserId = prefs.getString('last_user_id_v7') ?? _users.first.id;
+    final lastUserId = prefs.getString('last_user_id_v8') ?? _users.first.id;
     _currentUser = _users.firstWhere((u) => u.id == lastUserId, orElse: () => _users.first);
     await loadUserData(_currentUser!.id);
 
     _globalEngine?.cancel();
     _globalEngine = Timer.periodic(const Duration(seconds: 1), _engineTick);
+  }
+
+  void triggerUpdate() {
+    saveUserData();
+    notifyListeners();
   }
 
   void _engineTick(Timer t) {
@@ -527,13 +535,13 @@ class PlannerState extends ChangeNotifier {
 
   Future<void> loadUserData(String uid) async {
     final prefs = await SharedPreferences.getInstance();
-    final sJson = prefs.getString('sessions_v7_$uid');
+    final sJson = prefs.getString('sessions_v8_$uid');
     _sessions = sJson != null ? (jsonDecode(sJson) as List).map((s) => StudySession.fromJson(s)).toList() :[];
 
-    final dJson = prefs.getString('days_v7_$uid');
+    final dJson = prefs.getString('days_v8_$uid');
     if (dJson != null) _days = (jsonDecode(dJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v))); else _days = {};
 
-    final wJson = prefs.getString('weeks_v7_$uid');
+    final wJson = prefs.getString('weeks_v8_$uid');
     if (wJson != null) _weeks = (jsonDecode(wJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v))); else _weeks = {};
 
     _isLoading = false;
@@ -544,23 +552,23 @@ class PlannerState extends ChangeNotifier {
     if (_currentUser == null) return;
     final uid = _currentUser!.id;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sessions_v7_$uid', jsonEncode(_sessions.map((s) => s.toJson()).toList()));
-    await prefs.setString('days_v7_$uid', jsonEncode(_days.map((k, v) => MapEntry(k, v.toJson()))));
-    await prefs.setString('weeks_v7_$uid', jsonEncode(_weeks.map((k, v) => MapEntry(k, v.toJson()))));
+    await prefs.setString('sessions_v8_$uid', jsonEncode(_sessions.map((s) => s.toJson()).toList()));
+    await prefs.setString('days_v8_$uid', jsonEncode(_days.map((k, v) => MapEntry(k, v.toJson()))));
+    await prefs.setString('weeks_v8_$uid', jsonEncode(_weeks.map((k, v) => MapEntry(k, v.toJson()))));
   }
 
   Future<void> switchUser(String id) async {
     _isLoading = true; notifyListeners();
     _currentUser = _users.firstWhere((u) => u.id == id);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_user_id_v7', _currentUser!.id);
+    await prefs.setString('last_user_id_v8', _currentUser!.id);
     await loadUserData(_currentUser!.id);
   }
 
   Future<void> createUser(String name) async {
     _users.add(UserProfile(id: 'usr_${DateTime.now().millisecondsSinceEpoch}', name: name, customSubjects:[], customChapters: {}));
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sys_users_v7', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    await prefs.setString('sys_users_v8', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
   }
 
@@ -570,7 +578,7 @@ class PlannerState extends ChangeNotifier {
       int idx = _users.indexWhere((u) => u.id == _currentUser!.id);
       if (idx != -1) _users[idx] = _currentUser!;
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('sys_users_v7', jsonEncode(_users.map((u) => u.toJson()).toList()));
+      await prefs.setString('sys_users_v8', jsonEncode(_users.map((u) => u.toJson()).toList()));
       notifyListeners();
     }
   }
@@ -580,7 +588,7 @@ class PlannerState extends ChangeNotifier {
     _currentUser!.customSubjects.add(sub);
     _currentUser!.customChapters[sub] =[];
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sys_users_v7', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    await prefs.setString('sys_users_v8', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
   }
 
@@ -590,7 +598,7 @@ class PlannerState extends ChangeNotifier {
     if (_currentUser!.customChapters[sub]!.contains(chap)) return;
     _currentUser!.customChapters[sub]!.add(chap);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sys_users_v7', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    await prefs.setString('sys_users_v8', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
   }
 
@@ -601,7 +609,7 @@ class PlannerState extends ChangeNotifier {
     }
     _sessions.sort((a, b) => a.scheduledStartTime.compareTo(b.scheduledStartTime));
     _resolveOverlapsForDay(session.dateId);
-    saveUserData(); notifyListeners();
+    triggerUpdate();
   }
 
   void togglePauseActiveSession() {
@@ -609,13 +617,13 @@ class PlannerState extends ChangeNotifier {
     if (act != null) {
       if (!act.isPaused) act.pauseCount++;
       act.isPaused = !act.isPaused;
-      saveUserData(); notifyListeners();
+      triggerUpdate();
     }
   }
 
   void setSessionBonusMode(String id) {
     int idx = _sessions.indexWhere((s) => s.id == id);
-    if (idx != -1) { _sessions[idx].isBonusMode = true; saveUserData(); notifyListeners(); }
+    if (idx != -1) { _sessions[idx].isBonusMode = true; triggerUpdate(); }
   }
 
   void terminateSession(String id) {
@@ -624,7 +632,7 @@ class PlannerState extends ChangeNotifier {
       _sessions[idx].status = SessionStatus.terminated;
       _sessions[idx].completionTime = DateTime.now().millisecondsSinceEpoch;
       _resolveOverlapsForDay(_sessions[idx].dateId);
-      saveUserData(); notifyListeners();
+      triggerUpdate();
     }
   }
 
@@ -634,7 +642,7 @@ class PlannerState extends ChangeNotifier {
       _sessions[idx].status = SessionStatus.completed;
       _sessions[idx].completionTime = DateTime.now().millisecondsSinceEpoch;
       _resolveOverlapsForDay(_sessions[idx].dateId);
-      saveUserData(); notifyListeners();
+      triggerUpdate();
     }
   }
 
@@ -642,20 +650,15 @@ class PlannerState extends ChangeNotifier {
     int sIdx = _sessions.indexWhere((s) => s.id == sessionId);
     if (sIdx != -1) {
       _sessions[sIdx].goals.add(Goal(id: DateTime.now().millisecondsSinceEpoch.toString(), text: text, scope: Scope.session, referenceId: sessionId, subjectContext: _sessions[sIdx].subject, timestamp: DateTime.now().millisecondsSinceEpoch, isBonus: _sessions[sIdx].isBonusMode));
-      saveUserData(); notifyListeners();
+      triggerUpdate();
     }
-  }
-
-  void lockGoal(Goal goal) {
-    goal.isLocked = true;
-    saveUserData(); notifyListeners();
   }
 
   void addSessionRemark(String sessionId, String text) {
     int sIdx = _sessions.indexWhere((s) => s.id == sessionId);
     if (sIdx != -1) {
       _sessions[sIdx].remarks.add(Remark(id: DateTime.now().millisecondsSinceEpoch.toString(), text: text, timestamp: DateTime.now().millisecondsSinceEpoch, scope: Scope.session, referenceId: sessionId, subjectContext: _sessions[sIdx].subject));
-      saveUserData(); notifyListeners();
+      triggerUpdate();
     }
   }
 
@@ -681,20 +684,20 @@ class PlannerState extends ChangeNotifier {
         else _weeks[refId]!.overallRemarks.removeWhere((r) => r.id == id);
       }
     }
-    saveUserData(); notifyListeners();
+    triggerUpdate();
   }
 
   PlanNode getDayPlan(String dateId) {
     if (!_days.containsKey(dateId)) _days[dateId] = PlanNode(id: dateId, customName: '', overallGoals:[], overallRemarks: []);
     return _days[dateId]!;
   }
-  void updateDayPlan(PlanNode plan) { _days[plan.id] = plan; saveUserData(); notifyListeners(); }
+  void updateDayPlan(PlanNode plan) { _days[plan.id] = plan; triggerUpdate(); }
 
   PlanNode getWeekPlan(String weekId) {
-    if (!_weeks.containsKey(weekId)) _weeks[weekId] = PlanNode(id: weekId, customName: '', overallGoals:[], overallRemarks: []);
+    if (!_weeks.containsKey(weekId)) _weeks[weekId] = PlanNode(id: weekId, customName: '', overallGoals:[], overallRemarks:[]);
     return _weeks[weekId]!;
   }
-  void updateWeekPlan(PlanNode plan) { _weeks[plan.id] = plan; saveUserData(); notifyListeners(); }
+  void updateWeekPlan(PlanNode plan) { _weeks[plan.id] = plan; triggerUpdate(); }
 }
 
 // ==========================================
@@ -809,11 +812,12 @@ class _AdvancedFilterEngineState extends State<AdvancedFilterEngine> {
               ]),
               const SizedBox(height: 8),
               Row(children:[
-                Expanded(child: OutlinedButton(child: Text(_startDate == null ? 'START DATE' : DateFormat('MM/dd/yyyy').format(_startDate!)), onPressed: () async { final d = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2035)); if (d != null) setState(() => _startDate = d); })),
+                Expanded(child: DropdownButtonFormField<String>(value: _bonusFilter, decoration: const InputDecoration(labelText: 'BONUS TAG', isDense: true), items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'BONUS ONLY', child: Text('BONUS ONLY')), DropdownMenuItem(value: 'NON-BONUS', child: Text('NON-BONUS'))], onChanged: (v) => setState(() => _bonusFilter = v!))),
                 const SizedBox(width: 8),
-                Expanded(child: OutlinedButton(child: Text(_endDate == null ? 'END DATE' : DateFormat('MM/dd/yyyy').format(_endDate!)), onPressed: () async { final d = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2035)); if (d != null) setState(() => _endDate = d); })),
+                Expanded(child: OutlinedButton(child: Text(_startDate == null ? 'START DATE' : DateFormat('MM/dd/yyyy').format(_startDate!)), onPressed: () async { final d = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2035)); if (d != null) setState(() => _startDate = d); })),
                 IconButton(icon: const Icon(Icons.clear), onPressed: () => setState((){ _startDate = null; _endDate = null; }))
-              ])
+              ]),
+              if (_endDate == null) Padding(padding: const EdgeInsets.only(top: 8), child: OutlinedButton(child: const Text('END DATE'), onPressed: () async { final d = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2035)); if (d != null) setState(() => _endDate = d); })),
             ],
           ),
         ),
@@ -827,7 +831,7 @@ class _AdvancedFilterEngineState extends State<AdvancedFilterEngine> {
                 return VisualTileBuilder(goal: g, state: widget.state,
                   onGoalStatusCycle: () {
                     g.status = g.status == GoalStatus.pending ? GoalStatus.completed : (g.status == GoalStatus.completed ? GoalStatus.failed : GoalStatus.pending);
-                    widget.state.notifyListeners(); widget.state.saveUserData();
+                    widget.state.triggerUpdate();
                   });
               }
               return VisualTileBuilder(remark: filtered[i], state: widget.state);
@@ -1341,7 +1345,8 @@ class SessionDetailScreen extends StatelessWidget {
                 GoalStatus next = GoalStatus.pending;
                 if (g.status == GoalStatus.pending) next = GoalStatus.completed;
                 else if (g.status == GoalStatus.completed) next = GoalStatus.failed;
-                state.markGoal(s.id, g.id, next);
+                g.status = next;
+                state.triggerUpdate();
               },
             )),
             const SizedBox(height: 24),
@@ -1455,7 +1460,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ...plan.overallGoals.map((g) => VisualTileBuilder(goal: g, state: state,
             onGoalStatusCycle: () {
               g.status = g.status == GoalStatus.pending ? GoalStatus.completed : (g.status == GoalStatus.completed ? GoalStatus.failed : GoalStatus.pending);
-              scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan);
+              state.triggerUpdate();
             }
           )),
           FilledButton.icon(
@@ -1736,7 +1741,8 @@ class _AdvancedSortListBuilderState extends State<AdvancedSortListBuilder> {
                 const SizedBox(width: 8),
                 Expanded(child: OutlinedButton(child: Text(_startDate == null ? 'START DATE' : DateFormat('MM/dd/yyyy').format(_startDate!)), onPressed: () async { final d = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2035)); if (d != null) setState(() => _startDate = d); })),
                 IconButton(icon: const Icon(Icons.clear), onPressed: () => setState((){ _startDate = null; _endDate = null; }))
-              ])
+              ]),
+              if (_endDate == null) Padding(padding: const EdgeInsets.only(top: 8), child: OutlinedButton(child: const Text('END DATE'), onPressed: () async { final d = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2035)); if (d != null) setState(() => _endDate = d); })),
             ],
           ),
         ),
@@ -1750,7 +1756,7 @@ class _AdvancedSortListBuilderState extends State<AdvancedSortListBuilder> {
                 return VisualTileBuilder(goal: g, state: widget.state,
                   onGoalStatusCycle: () {
                     g.status = g.status == GoalStatus.pending ? GoalStatus.completed : (g.status == GoalStatus.completed ? GoalStatus.failed : GoalStatus.pending);
-                    widget.state.notifyListeners(); widget.state.saveUserData();
+                    widget.state.triggerUpdate();
                   });
               }
               return VisualTileBuilder(remark: filtered[i], state: widget.state);
@@ -1933,7 +1939,7 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
     sb.writeln("[X] : Completed Goal");
     sb.writeln("[!] : Failed Goal");
     sb.writeln("[BONUS] : Goal added during Bonus Time");
-    sb.writeln("[NORMAL] / [IMPORTANT] / [INTENSE] : Session Intensity Type");
+    sb.writeln("[NORMAL] / [IMPORTANT] /[INTENSE] : Session Intensity Type");
     sb.writeln("[DAY] / [WEEK] /[SESSION] : The scope/level the item belongs to");
     sb.writeln("SRC: The name of the parent session, day, or week.");
     sb.writeln("Ext: Extended paused time in format Days Hours Mins Secs.");
