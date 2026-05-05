@@ -159,8 +159,9 @@ class Goal {
   Scope scope;
   String referenceId;
   String subjectContext;
+  int timestamp; // Used for unified sorting in Global Directory
 
-  Goal({required this.id, required this.text, this.status = GoalStatus.pending, this.isLocked = false, required this.scope, required this.referenceId, this.subjectContext = ''});
+  Goal({required this.id, required this.text, this.status = GoalStatus.pending, this.isLocked = false, required this.scope, required this.referenceId, this.subjectContext = '', required this.timestamp});
   factory Goal.fromJson(Map<String, dynamic> json) => Goal(
         id: json['id'],
         text: json['text'],
@@ -169,10 +170,12 @@ class Goal {
         scope: Scope.values.firstWhere((e) => e.toString() == json['scope'], orElse: () => Scope.session),
         referenceId: json['referenceId'] ?? '',
         subjectContext: json['subjectContext'] ?? '',
+        timestamp: json['timestamp'] ?? DateTime.now().millisecondsSinceEpoch,
       );
   Map<String, dynamic> toJson() => {
         'id': id, 'text': text, 'status': status.toString(), 'isLocked': isLocked,
         'scope': scope.toString(), 'referenceId': referenceId, 'subjectContext': subjectContext,
+        'timestamp': timestamp,
       };
 }
 
@@ -206,7 +209,8 @@ class StudySession {
   int scheduledStartTime;
   int durationMinutes;
   int pausedSeconds;
-  int elapsedSeconds;
+  int elapsedSeconds; 
+  int pauseCount;
   bool isPaused;
   SessionType type;
   String subject;
@@ -219,7 +223,7 @@ class StudySession {
   StudySession({
     required this.id, required this.name, required this.description,
     required this.baseStartTime, required this.scheduledStartTime, required this.durationMinutes,
-    this.pausedSeconds = 0, this.elapsedSeconds = 0, this.isPaused = false,
+    this.pausedSeconds = 0, this.elapsedSeconds = 0, this.pauseCount = 0, this.isPaused = false,
     required this.type, required this.subject, required this.chapter,
     required this.goals, required this.remarks, this.status = SessionStatus.scheduled, this.completionTime,
   });
@@ -233,6 +237,7 @@ class StudySession {
         durationMinutes: json['durationMinutes'],
         pausedSeconds: json['pausedSeconds'] ?? 0,
         elapsedSeconds: json['elapsedSeconds'] ?? 0,
+        pauseCount: json['pauseCount'] ?? 0,
         isPaused: json['isPaused'] ?? false,
         type: SessionType.values.firstWhere((e) => e.toString() == json['type'], orElse: () => SessionType.normal),
         subject: json['subject'],
@@ -246,7 +251,7 @@ class StudySession {
   Map<String, dynamic> toJson() => {
         'id': id, 'name': name, 'description': description, 'baseStartTime': baseStartTime,
         'scheduledStartTime': scheduledStartTime, 'durationMinutes': durationMinutes,
-        'pausedSeconds': pausedSeconds, 'elapsedSeconds': elapsedSeconds, 'isPaused': isPaused,
+        'pausedSeconds': pausedSeconds, 'elapsedSeconds': elapsedSeconds, 'pauseCount': pauseCount, 'isPaused': isPaused,
         'type': type.toString(), 'subject': subject, 'chapter': chapter,
         'goals': goals.map((g) => g.toJson()).toList(), 'remarks': remarks.map((r) => r.toJson()).toList(),
         'status': status.toString(), 'completionTime': completionTime,
@@ -274,7 +279,7 @@ class PlanNode {
   factory PlanNode.fromJson(Map<String, dynamic> json) => PlanNode(
         id: json['id'],
         customName: json['customName'] ?? '',
-        overallGoals: (json['overallGoals'] as List?)?.map((g) => Goal.fromJson(g)).toList() ?? [],
+        overallGoals: (json['overallGoals'] as List?)?.map((g) => Goal.fromJson(g)).toList() ??[],
         overallRemarks: (json['overallRemarks'] as List?)?.map((r) => Remark.fromJson(r)).toList() ??[],
       );
   Map<String, dynamic> toJson() => {
@@ -282,6 +287,82 @@ class PlanNode {
         'overallGoals': overallGoals.map((g) => g.toJson()).toList(),
         'overallRemarks': overallRemarks.map((r) => r.toJson()).toList()
       };
+}
+
+// ==========================================
+// VISUAL UTILITY & WIDGETS
+// ==========================================
+class VisualTileBuilder extends StatelessWidget {
+  final Goal? goal;
+  final Remark? remark;
+  final PlannerState state;
+  final VoidCallback? onTap;
+  final VoidCallback? onSecondaryTap;
+
+  const VisualTileBuilder({super.key, this.goal, this.remark, required this.state, this.onTap, this.onSecondaryTap});
+
+  @override
+  Widget build(BuildContext context) {
+    bool isGoal = goal != null;
+    Scope scope = isGoal ? goal!.scope : remark!.scope;
+    String refId = isGoal ? goal!.referenceId : remark!.referenceId;
+    String text = isGoal ? goal!.text : remark!.text;
+    int timestamp = isGoal ? goal!.timestamp : remark!.timestamp;
+
+    String sessionName = 'N/A';
+    SessionType sType = SessionType.normal;
+
+    if (scope == Scope.session) {
+      try {
+        final s = state.sessions.firstWhere((x) => x.id == refId);
+        sessionName = s.name;
+        sType = s.type;
+      } catch (_) { sessionName = '[DELETED SESSION]'; }
+    } else {
+      sessionName = scope == Scope.day ? 'DAY OVERALL' : 'WEEK OVERALL';
+    }
+
+    Color borderColor = inkBlack;
+    if (sType == SessionType.important) borderColor = importantBlue;
+    if (sType == SessionType.intense) borderColor = intensePurple;
+
+    Widget leadingIcon;
+    if (isGoal) {
+      if (goal!.status == GoalStatus.completed) leadingIcon = const Icon(Icons.check_circle, color: steamGreen);
+      else if (goal!.status == GoalStatus.failed) leadingIcon = const Icon(Icons.cancel, color: rustRed);
+      else leadingIcon = const Icon(Icons.circle_outlined, color: inkBlack);
+    } else {
+      leadingIcon = Icon(Icons.comment, color: borderColor);
+    }
+
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(border: Border(left: BorderSide(color: borderColor, width: 8))),
+          child: ListTile(
+            leading: isGoal ? IconButton(icon: leadingIcon, onPressed: goal!.isLocked ? null : onSecondaryTap) : leadingIcon,
+            title: Text(text, style: TextStyle(
+              fontWeight: FontWeight.bold,
+              decoration: isGoal && goal!.status == GoalStatus.completed ? TextDecoration.lineThrough : null,
+              color: isGoal && goal!.status == GoalStatus.failed ? rustRed : inkBlack,
+            )),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children:[
+                const SizedBox(height: 4),
+                Text('SRC: $sessionName', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                Text(DateFormat('MM/dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(timestamp)), style: const TextStyle(fontSize: 10, color: Colors.black54)),
+              ],
+            ),
+            trailing: isGoal 
+              ? IconButton(icon: Icon(goal!.isLocked ? Icons.lock : Icons.lock_open, color: goal!.isLocked ? rustRed : Colors.black38), onPressed: goal!.isLocked ? null : onTap)
+              : null,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 // ==========================================
@@ -300,6 +381,8 @@ class PlannerState extends ChangeNotifier {
   List<UserProfile> get users => _users;
   UserProfile? get currentUser => _currentUser;
   List<StudySession> get sessions => _sessions;
+  Map<String, PlanNode> get days => _days;
+  Map<String, PlanNode> get weeks => _weeks;
   bool get isLoading => _isLoading;
 
   List<String> get availableSubjects {
@@ -314,24 +397,21 @@ class PlannerState extends ChangeNotifier {
   }
 
   StudySession? get activeSession {
-    try {
-      return _sessions.firstWhere((s) => s.status == SessionStatus.active);
-    } catch (e) {
-      return null;
-    }
+    try { return _sessions.firstWhere((s) => s.status == SessionStatus.active); } 
+    catch (e) { return null; }
   }
 
   Future<void> initSystem() async {
     final prefs = await SharedPreferences.getInstance();
-    final usersJson = prefs.getString('sys_users_v4');
+    final usersJson = prefs.getString('sys_users_v5');
     if (usersJson != null) {
       _users = (jsonDecode(usersJson) as List).map((u) => UserProfile.fromJson(u)).toList();
     }
     if (_users.isEmpty) {
       _users.add(UserProfile(id: 'usr_${DateTime.now().millisecondsSinceEpoch}', name: 'OPERATOR_01', customSubjects:[]));
-      await prefs.setString('sys_users_v4', jsonEncode(_users.map((u) => u.toJson()).toList()));
+      await prefs.setString('sys_users_v5', jsonEncode(_users.map((u) => u.toJson()).toList()));
     }
-    final lastUserId = prefs.getString('last_user_id_v4') ?? _users.first.id;
+    final lastUserId = prefs.getString('last_user_id_v5') ?? _users.first.id;
     _currentUser = _users.firstWhere((u) => u.id == lastUserId, orElse: () => _users.first);
     await loadUserData(_currentUser!.id);
 
@@ -424,17 +504,17 @@ class PlannerState extends ChangeNotifier {
 
   Future<void> loadUserData(String uid) async {
     final prefs = await SharedPreferences.getInstance();
-    final sJson = prefs.getString('sessions_v4_$uid');
+    final sJson = prefs.getString('sessions_v5_$uid');
     _sessions = sJson != null ? (jsonDecode(sJson) as List).map((s) => StudySession.fromJson(s)).toList() :[];
 
-    final dJson = prefs.getString('days_v4_$uid');
+    final dJson = prefs.getString('days_v5_$uid');
     if (dJson != null) {
       _days = (jsonDecode(dJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v)));
     } else {
       _days = {};
     }
 
-    final wJson = prefs.getString('weeks_v4_$uid');
+    final wJson = prefs.getString('weeks_v5_$uid');
     if (wJson != null) {
       _weeks = (jsonDecode(wJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v)));
     } else {
@@ -449,24 +529,23 @@ class PlannerState extends ChangeNotifier {
     if (_currentUser == null) return;
     final uid = _currentUser!.id;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sessions_v4_$uid', jsonEncode(_sessions.map((s) => s.toJson()).toList()));
-    await prefs.setString('days_v4_$uid', jsonEncode(_days.map((k, v) => MapEntry(k, v.toJson()))));
-    await prefs.setString('weeks_v4_$uid', jsonEncode(_weeks.map((k, v) => MapEntry(k, v.toJson()))));
+    await prefs.setString('sessions_v5_$uid', jsonEncode(_sessions.map((s) => s.toJson()).toList()));
+    await prefs.setString('days_v5_$uid', jsonEncode(_days.map((k, v) => MapEntry(k, v.toJson()))));
+    await prefs.setString('weeks_v5_$uid', jsonEncode(_weeks.map((k, v) => MapEntry(k, v.toJson()))));
   }
 
   Future<void> switchUser(String id) async {
-    _isLoading = true;
-    notifyListeners();
+    _isLoading = true; notifyListeners();
     _currentUser = _users.firstWhere((u) => u.id == id);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_user_id_v4', _currentUser!.id);
+    await prefs.setString('last_user_id_v5', _currentUser!.id);
     await loadUserData(_currentUser!.id);
   }
 
   Future<void> createUser(String name) async {
     _users.add(UserProfile(id: 'usr_${DateTime.now().millisecondsSinceEpoch}', name: name, customSubjects:[]));
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sys_users_v4', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    await prefs.setString('sys_users_v5', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
   }
 
@@ -474,7 +553,7 @@ class PlannerState extends ChangeNotifier {
     if (_currentUser == null || _currentUser!.customSubjects.contains(sub)) return;
     _currentUser!.customSubjects.add(sub);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sys_users_v4', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    await prefs.setString('sys_users_v5', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
   }
 
@@ -494,6 +573,7 @@ class PlannerState extends ChangeNotifier {
   void togglePauseActiveSession() {
     var act = activeSession;
     if (act != null) {
+      if (!act.isPaused) act.pauseCount++;
       act.isPaused = !act.isPaused;
       saveUserData();
       notifyListeners();
@@ -525,7 +605,7 @@ class PlannerState extends ChangeNotifier {
   void addGoalToSession(String sessionId, String text) {
     int sIdx = _sessions.indexWhere((s) => s.id == sessionId);
     if (sIdx != -1) {
-      _sessions[sIdx].goals.add(Goal(id: DateTime.now().millisecondsSinceEpoch.toString(), text: text, scope: Scope.session, referenceId: sessionId, subjectContext: _sessions[sIdx].subject));
+      _sessions[sIdx].goals.add(Goal(id: DateTime.now().millisecondsSinceEpoch.toString(), text: text, scope: Scope.session, referenceId: sessionId, subjectContext: _sessions[sIdx].subject, timestamp: DateTime.now().millisecondsSinceEpoch));
       saveUserData();
       notifyListeners();
     }
@@ -611,7 +691,7 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
-  final List<Widget> _screens = const[DashboardScreen(), CalendarScreen(), DataBrowserScreen(), GlobalStatsScreen(), ProfileScreen()];
+  final List<Widget> _screens = const [DashboardScreen(), CalendarScreen(), DataBrowserScreen(), GlobalStatsScreen(), ProfileScreen()];
 
   @override
   Widget build(BuildContext context) {
@@ -717,7 +797,7 @@ class DashboardScreen extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+        children:[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children:[
@@ -751,7 +831,7 @@ class DashboardScreen extends StatelessWidget {
           decoration: BoxDecoration(border: Border(left: BorderSide(color: bColor, width: 8))),
           padding: const EdgeInsets.all(16),
           child: Row(
-            children: [
+            children:[
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children:[
@@ -900,7 +980,7 @@ class _SessionEditorScreenState extends State<SessionEditorScreen> {
     final state = context.watch<PlannerState>();
     bool isLocked = widget.existing != null && widget.existing!.status != SessionStatus.scheduled;
     if (_subject == null && state.availableSubjects.isNotEmpty) _subject = state.availableSubjects.first;
-    List<String> chapters = _subject != null ? state.getChaptersForSubject(_subject!) : ['General'];
+    List<String> chapters = _subject != null ? state.getChaptersForSubject(_subject!) :['General'];
     if (_chapter == null || !chapters.contains(_chapter)) _chapter = chapters.first;
 
     return Scaffold(
@@ -954,7 +1034,7 @@ class _SessionEditorScreenState extends State<SessionEditorScreen> {
                               OutlinedButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
                               FilledButton(
                                   onPressed: () {
-                                    if (c.text.isNotEmpty) setState(() => _goals.add(Goal(id: DateTime.now().millisecondsSinceEpoch.toString(), text: c.text, scope: Scope.session, referenceId: '', subjectContext: _subject!)));
+                                    if (c.text.isNotEmpty) setState(() => _goals.add(Goal(id: DateTime.now().millisecondsSinceEpoch.toString(), text: c.text, scope: Scope.session, referenceId: '', subjectContext: _subject!, timestamp: DateTime.now().millisecondsSinceEpoch)));
                                     Navigator.pop(ctx);
                                   },
                                   child: const Text('ADD'))
@@ -1001,7 +1081,6 @@ class SessionDetailScreen extends StatelessWidget {
     final state = context.watch<PlannerState>();
     final s = state.sessions.firstWhere((x) => x.id == session.id, orElse: () => session);
 
-    // "COMPLETE SESSION" early logic: Check if running and ALL goals are resolved (none pending).
     bool allGoalsResolved = s.goals.isNotEmpty && !s.goals.any((g) => g.status == GoalStatus.pending);
     bool canCompleteEarly = s.status == SessionStatus.active && allGoalsResolved;
 
@@ -1044,8 +1123,9 @@ class SessionDetailScreen extends StatelessWidget {
                   Text(s.description),
                   const Divider(height: 32),
                   Text('STATUS: ${s.status.name.toUpperCase()}', style: TextStyle(fontWeight: FontWeight.bold, color: s.status == SessionStatus.completed ? steamGreen : (s.status == SessionStatus.active ? brassAccent : inkBlack))),
-                  Text('SCHEDULED: ${DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.scheduledStartTime))}'),
-                  Text('PAUSED EXTENSION: ${s.pausedSeconds} SEC'),
+                  Text('SCHEDULED (BASE): ${DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.baseStartTime))}'),
+                  Text('SCHEDULED (DYN): ${DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.scheduledStartTime))}'),
+                  Text('PAUSED EXTENSION: ${s.pausedSeconds} SEC | PAUSE COUNT: ${s.pauseCount}'),
                   if (s.status == SessionStatus.completed) Text('ACTUAL END: ${DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.completionTime!))}'),
                 ],
               ),
@@ -1083,7 +1163,15 @@ class SessionDetailScreen extends StatelessWidget {
                       })
               ],
             ),
-            ...s.goals.map((g) => _buildGoalTile(context, state, s.id, g)),
+            ...s.goals.map((g) => VisualTileBuilder(goal: g, state: state, 
+              onSecondaryTap: () {
+                GoalStatus next = GoalStatus.pending;
+                if (g.status == GoalStatus.pending) next = GoalStatus.completed;
+                else if (g.status == GoalStatus.completed) next = GoalStatus.failed;
+                state.markGoal(s.id, g.id, next);
+              },
+              onTap: () { if (!g.isLocked) state.lockGoal(s.id, g.id); }
+            )),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1107,42 +1195,10 @@ class SessionDetailScreen extends StatelessWidget {
                     })
               ],
             ),
-            ...s.remarks.map((r) => Card(child: ListTile(title: Text(r.text), subtitle: Text(DateFormat('MM/dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(r.timestamp)))))),
+            ...s.remarks.map((r) => VisualTileBuilder(remark: r, state: state)),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildGoalTile(BuildContext context, PlannerState state, String sessionId, Goal g) {
-    IconData icon = Icons.circle_outlined;
-    Color color = inkBlack;
-    if (g.status == GoalStatus.completed) {
-      icon = Icons.check_circle;
-      color = steamGreen;
-    }
-    if (g.status == GoalStatus.failed) {
-      icon = Icons.cancel;
-      color = rustRed;
-    }
-
-    return ListTile(
-      leading: IconButton(
-          icon: Icon(icon, color: color),
-          onPressed: g.isLocked
-              ? null
-              : () {
-                  GoalStatus next = GoalStatus.pending;
-                  if (g.status == GoalStatus.pending) next = GoalStatus.completed;
-                  else if (g.status == GoalStatus.completed) next = GoalStatus.failed;
-                  state.markGoal(sessionId, g.id, next);
-                }),
-      title: Text(g.text, style: TextStyle(decoration: g.status == GoalStatus.completed ? TextDecoration.lineThrough : null, color: g.status == GoalStatus.failed ? rustRed : inkBlack)),
-      trailing: IconButton(
-          icon: Icon(g.isLocked ? Icons.lock : Icons.lock_open, color: g.isLocked ? rustRed : Colors.black38),
-          onPressed: () {
-            if (!g.isLocked) state.lockGoal(sessionId, g.id);
-          }),
     );
   }
 }
@@ -1201,7 +1257,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+        children:[
           Row(children:[
             Expanded(child: Text(plan.customName.isEmpty ? 'UNNAMED ${scope.name.toUpperCase()}' : plan.customName.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
             IconButton(
@@ -1224,22 +1280,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ]),
           const Divider(),
           const Text('OVERALL GOALS', style: TextStyle(fontWeight: FontWeight.bold)),
-          ...plan.overallGoals.map((g) => ListTile(
-                leading: Icon(g.status == GoalStatus.completed ? Icons.check_box : (g.status == GoalStatus.failed ? Icons.cancel : Icons.check_box_outline_blank), color: g.status == GoalStatus.failed ? rustRed : inkBlack),
-                title: Text(g.text, style: TextStyle(decoration: g.status == GoalStatus.completed ? TextDecoration.lineThrough : null)),
-                trailing: IconButton(
-                    icon: Icon(g.isLocked ? Icons.lock : Icons.lock_open, color: g.isLocked ? rustRed : Colors.black38),
-                    onPressed: () {
-                      g.isLocked = true;
-                      scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan);
-                    }),
-                onTap: g.isLocked
-                    ? null
-                    : () {
-                        g.status = g.status == GoalStatus.pending ? GoalStatus.completed : (g.status == GoalStatus.completed ? GoalStatus.failed : GoalStatus.pending);
-                        scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan);
-                      },
-              )),
+          ...plan.overallGoals.map((g) => VisualTileBuilder(goal: g, state: state,
+            onSecondaryTap: () {
+              g.status = g.status == GoalStatus.pending ? GoalStatus.completed : (g.status == GoalStatus.completed ? GoalStatus.failed : GoalStatus.pending);
+              scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan);
+            },
+            onTap: () { g.isLocked = true; scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan); }
+          )),
           FilledButton.icon(
               icon: const Icon(Icons.add),
               label: const Text('ADD GOAL'),
@@ -1250,7 +1297,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[
                           FilledButton(
                               onPressed: () {
-                                plan.overallGoals.add(Goal(id: DateTime.now().millisecondsSinceEpoch.toString(), text: c.text, scope: scope, referenceId: refId));
+                                plan.overallGoals.add(Goal(id: DateTime.now().millisecondsSinceEpoch.toString(), text: c.text, scope: scope, referenceId: refId, timestamp: DateTime.now().millisecondsSinceEpoch));
                                 scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan);
                                 Navigator.pop(ctx);
                               },
@@ -1259,7 +1306,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               }),
           const SizedBox(height: 24),
           const Text('OVERALL REMARKS', style: TextStyle(fontWeight: FontWeight.bold)),
-          ...plan.overallRemarks.map((r) => Card(color: brassAccent.withOpacity(0.1), child: ListTile(title: Text(r.text), subtitle: Text(DateFormat('MM/dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(r.timestamp)))))),
+          ...plan.overallRemarks.map((r) => VisualTileBuilder(remark: r, state: state)),
           FilledButton.icon(
               icon: const Icon(Icons.add),
               label: const Text('ADD REMARK'),
@@ -1300,35 +1347,70 @@ class GlobalStatsScreen extends StatelessWidget {
     final state = context.watch<PlannerState>();
     final validSessions = state.sessions.where((s) => s.status == SessionStatus.completed).toList();
 
+    int totalSecs = validSessions.fold(0, (sum, s) => sum + s.elapsedSeconds);
+    double totalHours = totalSecs / 3600;
+    int totalGoals = validSessions.fold(0, (sum, s) => sum + s.goals.length);
+    int compGoals = validSessions.fold(0, (sum, s) => sum + s.goals.where((g) => g.status == GoalStatus.completed).length);
+    double completionRate = totalGoals > 0 ? (compGoals / totalGoals) * 100 : 0;
+    int totalPauses = validSessions.fold(0, (sum, s) => sum + s.pauseCount);
+    int totalExt = validSessions.fold(0, (sum, s) => sum + s.pausedSeconds);
+
     Map<String, int> subHours = {};
     for (var s in validSessions) {
-      int currentVal = subHours[s.subject] ?? 0;
-      subHours[s.subject] = currentVal + s.elapsedSeconds;
+      subHours[s.subject] = (subHours[s.subject] ?? 0) + s.elapsedSeconds;
     }
 
-    List<BarChartGroupData> barGroups = [];
+    List<BarChartGroupData> barGroups =[];
     List<String> subLabels =[];
     int xIndex = 0;
+    double maxY = 1;
+    
     subHours.forEach((sub, secs) {
-      barGroups.add(BarChartGroupData(x: xIndex++, barRods:[BarChartRodData(toY: secs / 3600.0, color: inkBlack, width: 20, borderRadius: BorderRadius.zero)]));
+      double yVal = secs / 3600.0;
+      if (yVal > maxY) maxY = yVal;
+      barGroups.add(BarChartGroupData(x: xIndex++, barRods:[BarChartRodData(toY: yVal, color: inkBlack, width: 24, borderRadius: BorderRadius.zero)]));
       subLabels.add(sub.length > 4 ? sub.substring(0, 4) : sub);
     });
+
+    maxY = maxY * 1.2; 
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children:[
-          const Text('GLOBAL TELEMETRY', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children:[
+            const Text('GLOBAL TELEMETRY', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+            OutlinedButton.icon(icon: const Icon(Icons.folder_open), label: const Text('DIRECTORY'), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GlobalDirectoryScreen())))
+          ]),
           const SizedBox(height: 16),
+          Row(children:[
+            Expanded(child: _buildStatBox('TOTAL HOURS', totalHours.toStringAsFixed(1))),
+            const SizedBox(width: 8),
+            Expanded(child: _buildStatBox('SESSIONS', validSessions.length.toString())),
+            const SizedBox(width: 8),
+            Expanded(child: _buildStatBox('GOAL COMP', '${completionRate.toStringAsFixed(0)}%')),
+          ]),
+          const SizedBox(height: 8),
+          Row(children:[
+            Expanded(child: _buildStatBox('TOTAL PAUSES', totalPauses.toString())),
+            const SizedBox(width: 8),
+            Expanded(child: _buildStatBox('TOTAL EXT', '${(totalExt/60).toStringAsFixed(0)}m')),
+          ]),
+          const SizedBox(height: 24),
           if (barGroups.isNotEmpty)
             Container(
               height: 250,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)),
               child: BarChart(BarChartData(
+                maxY: maxY,
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(getTooltipItem: (group, groupIndex, rod, rodIndex) => BarTooltipItem('${rod.toY.toStringAsFixed(2)} h', const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                ),
                 titlesData: FlTitlesData(
-                  bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, getTitlesWidget: (val, meta) => Padding(padding: const EdgeInsets.only(top: 8), child: Text(subLabels[val.toInt()], style: const TextStyle(fontSize: 10))))),
+                  bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, getTitlesWidget: (val, meta) => Padding(padding: const EdgeInsets.only(top: 8), child: Text(subLabels[val.toInt()], style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold))))),
                   leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40, getTitlesWidget: (val, meta) => Text('${val.toInt()}h', style: const TextStyle(fontSize: 12)))),
                   topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -1358,6 +1440,14 @@ class GlobalStatsScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildStatBox(String title, String val) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2), color: brassAccent.withOpacity(0.1)),
+      child: Column(children:[Text(val, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)), Text(title, style: const TextStyle(fontSize: 10), textAlign: TextAlign.center)]),
+    );
+  }
 }
 
 class SubjectSpecificScreen extends StatelessWidget {
@@ -1367,8 +1457,24 @@ class SubjectSpecificScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<PlannerState>();
-    final sessions = state.sessions.where((s) => s.subject == subject && s.status != SessionStatus.terminated).toList();
+    final sessions = state.sessions.where((s) => s.subject == subject && s.status == SessionStatus.completed).toList();
     final chapters = state.getChaptersForSubject(subject);
+
+    int totalSecs = sessions.fold(0, (sum, s) => sum + s.elapsedSeconds);
+    int totalGoals = sessions.fold(0, (sum, s) => sum + s.goals.length);
+    int compGoals = sessions.fold(0, (sum, s) => sum + s.goals.where((g) => g.status == GoalStatus.completed).length);
+
+    Map<String, int> chapSecs = {};
+    for (var s in sessions) chapSecs[s.chapter] = (chapSecs[s.chapter] ?? 0) + s.elapsedSeconds;
+    
+    List<BarChartGroupData> barGroups =[];
+    int xIndex = 0; double maxY = 1;
+    chapSecs.forEach((chap, secs) {
+      double yVal = secs / 3600.0;
+      if (yVal > maxY) maxY = yVal;
+      barGroups.add(BarChartGroupData(x: xIndex++, barRods:[BarChartRodData(toY: yVal, color: inkBlack, width: 16, borderRadius: BorderRadius.zero)]));
+    });
+    maxY = maxY * 1.2;
 
     return DefaultTabController(
       length: 4,
@@ -1379,38 +1485,48 @@ class SubjectSpecificScreen extends StatelessWidget {
               indicatorColor: inkBlack,
               labelColor: inkBlack,
               isScrollable: true,
-              tabs:[Tab(text: 'CHAPTERS'), Tab(text: 'SESSIONS'), Tab(text: 'GOALS'), Tab(text: 'REMARKS')]),
+              tabs:[Tab(text: 'OVERVIEW'), Tab(text: 'SESSIONS'), Tab(text: 'GOALS'), Tab(text: 'REMARKS')]),
         ),
         body: TabBarView(
           children:[
-            // CHAPTERS TAB
-            ListView(
+            // OVERVIEW TAB
+            SingleChildScrollView(
               padding: const EdgeInsets.all(16),
-              children: chapters.map((c) {
-                int chapSecs = sessions.where((s) => s.chapter == c && s.status == SessionStatus.completed).fold(0, (sum, s) => sum + s.elapsedSeconds);
-                return Card(
-                    child: ListTile(
-                  title: Text(c, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  trailing: Text('${(chapSecs / 3600).toStringAsFixed(1)} H', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChapterSpecificScreen(subject: subject, chapter: c))),
-                ));
-              }).toList(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children:[
+                  Row(children:[
+                    Expanded(child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)), child: Column(children:[Text((totalSecs/3600).toStringAsFixed(1), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)), const Text('HOURS', style: TextStyle(fontSize: 10))]))),
+                    const SizedBox(width: 8),
+                    Expanded(child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)), child: Column(children:[Text(sessions.length.toString(), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)), const Text('SESSIONS', style: TextStyle(fontSize: 10))]))),
+                    const SizedBox(width: 8),
+                    Expanded(child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)), child: Column(children:[Text(totalGoals > 0 ? '${((compGoals/totalGoals)*100).toStringAsFixed(0)}%' : '0%', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)), const Text('GOAL COMP', style: TextStyle(fontSize: 10))]))),
+                  ]),
+                  const SizedBox(height: 24),
+                  if (barGroups.isNotEmpty)
+                    Container(
+                      height: 200, padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)),
+                      child: BarChart(BarChartData(
+                        maxY: maxY,
+                        barTouchData: BarTouchData(enabled: true, touchTooltipData: BarTouchTooltipData(getTooltipItem: (group, groupIndex, rod, rodIndex) => BarTooltipItem('${rod.toY.toStringAsFixed(2)} h', const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
+                        titlesData: FlTitlesData(bottomTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)), leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40, getTitlesWidget: (val, meta) => Text('${val.toInt()}h', style: const TextStyle(fontSize: 10)))), topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)), rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false))),
+                        gridData: FlGridData(show: true, drawVerticalLine: false, getDrawingHorizontalLine: (v) => const FlLine(color: Colors.black26, strokeWidth: 1, dashArray:[4, 4])), borderData: FlBorderData(show: false), barGroups: barGroups,
+                      )),
+                    ),
+                  const SizedBox(height: 24),
+                  const Text('CHAPTER DIRECTORY', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ...chapters.map((c) {
+                    return Card(child: ListTile(title: Text(c, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)), trailing: Text('${((chapSecs[c] ?? 0) / 3600).toStringAsFixed(1)} H'), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChapterSpecificScreen(subject: subject, chapter: c)))));
+                  })
+                ],
+              )
             ),
             // SESSIONS TAB
-            ListView(
-              padding: const EdgeInsets.all(16),
-              children: sessions.map((s) => ListTile(title: Text(s.name), subtitle: Text('${s.chapter} | ${s.status.name.toUpperCase()}'), trailing: OutlinedButton(child: const Text('OPEN'), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SessionDetailScreen(session: s)))))).toList(),
-            ),
+            ListView(padding: const EdgeInsets.all(16), children: sessions.map((s) => ListTile(title: Text(s.name), subtitle: Text('${s.chapter} | ${s.status.name.toUpperCase()}'), trailing: OutlinedButton(child: const Text('OPEN'), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SessionDetailScreen(session: s)))))).toList()),
             // GOALS TAB
-            ListView(
-              padding: const EdgeInsets.all(16),
-              children: sessions.expand((s) => s.goals.map((g) => ListTile(title: Text(g.text), subtitle: Text('${s.chapter} | ${g.status.name.toUpperCase()}')))).toList(),
-            ),
+            ListView(padding: const EdgeInsets.all(16), children: sessions.expand((s) => s.goals.map((g) => VisualTileBuilder(goal: g, state: state))).toList()),
             // REMARKS TAB
-            ListView(
-              padding: const EdgeInsets.all(16),
-              children: sessions.expand((s) => s.remarks.map((r) => Card(child: ListTile(title: Text(r.text), subtitle: Text('${s.chapter} | ${DateFormat('MM/dd').format(DateTime.fromMillisecondsSinceEpoch(r.timestamp))}'))))).toList(),
-            ),
+            ListView(padding: const EdgeInsets.all(16), children: sessions.expand((s) => s.remarks.map((r) => VisualTileBuilder(remark: r, state: state))).toList()),
           ],
         ),
       ),
@@ -1438,10 +1554,72 @@ class ChapterSpecificScreen extends StatelessWidget {
         body: TabBarView(
           children:[
             ListView(padding: const EdgeInsets.all(16), children: sessions.map((s) => ListTile(title: Text(s.name), subtitle: Text(s.status.name.toUpperCase()), trailing: OutlinedButton(child: const Text('OPEN'), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SessionDetailScreen(session: s)))))).toList()),
-            ListView(padding: const EdgeInsets.all(16), children: sessions.expand((s) => s.goals.map((g) => ListTile(title: Text(g.text), subtitle: Text(g.status.name.toUpperCase())))).toList()),
-            ListView(padding: const EdgeInsets.all(16), children: sessions.expand((s) => s.remarks.map((r) => Card(child: ListTile(title: Text(r.text), subtitle: Text(DateFormat('MM/dd').format(DateTime.fromMillisecondsSinceEpoch(r.timestamp))))))).toList()),
+            ListView(padding: const EdgeInsets.all(16), children: sessions.expand((s) => s.goals.map((g) => VisualTileBuilder(goal: g, state: state))).toList()),
+            ListView(padding: const EdgeInsets.all(16), children: sessions.expand((s) => s.remarks.map((r) => VisualTileBuilder(remark: r, state: state))).toList()),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ==========================================
+// GLOBAL DIRECTORY (Visual & Sorted Lists)
+// ==========================================
+class GlobalDirectoryScreen extends StatefulWidget {
+  const GlobalDirectoryScreen({super.key});
+  @override
+  State<GlobalDirectoryScreen> createState() => _GlobalDirectoryScreenState();
+}
+
+class _GlobalDirectoryScreenState extends State<GlobalDirectoryScreen> {
+  String _sortMode = 'TIME DESC';
+  String _typeFilter = 'ALL';
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<PlannerState>();
+    
+    List<dynamic> items =[];
+    if (_typeFilter == 'ALL' || _typeFilter == 'GOALS') {
+      items.addAll(state.sessions.where((s)=>s.status!=SessionStatus.terminated).expand((s) => s.goals));
+      items.addAll(state.days.values.expand((d) => d.overallGoals));
+      items.addAll(state.weeks.values.expand((w) => w.overallGoals));
+    }
+    if (_typeFilter == 'ALL' || _typeFilter == 'REMARKS') {
+      items.addAll(state.sessions.where((s)=>s.status!=SessionStatus.terminated).expand((s) => s.remarks));
+      items.addAll(state.days.values.expand((d) => d.overallRemarks));
+      items.addAll(state.weeks.values.expand((w) => w.overallRemarks));
+    }
+
+    if (_sortMode == 'TIME DESC') items.sort((a,b) => b.timestamp.compareTo(a.timestamp));
+    if (_sortMode == 'TIME ASC') items.sort((a,b) => a.timestamp.compareTo(b.timestamp));
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('GLOBAL DIRECTORY')),
+      body: Column(
+        children:[
+          Container(
+            padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border(bottom: BorderSide(color: inkBlack, width: 2))),
+            child: Row(
+              children:[
+                Expanded(child: DropdownButtonFormField<String>(value: _sortMode, decoration: const InputDecoration(labelText: 'SORT'), items: const[DropdownMenuItem(value: 'TIME DESC', child: Text('NEWEST')), DropdownMenuItem(value: 'TIME ASC', child: Text('OLDEST'))], onChanged: (v) => setState(() => _sortMode = v!))),
+                const SizedBox(width: 16),
+                Expanded(child: DropdownButtonFormField<String>(value: _typeFilter, decoration: const InputDecoration(labelText: 'TYPE'), items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'GOALS', child: Text('GOALS')), DropdownMenuItem(value: 'REMARKS', child: Text('REMARKS'))], onChanged: (v) => setState(() => _typeFilter = v!))),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: items.length,
+              itemBuilder: (ctx, i) {
+                if (items[i] is Goal) return VisualTileBuilder(goal: items[i] as Goal, state: state);
+                return VisualTileBuilder(remark: items[i] as Remark, state: state);
+              },
+            ),
+          )
+        ],
       ),
     );
   }
@@ -1465,6 +1643,9 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
   bool _incPending = true;
   bool _incCompleted = true;
   bool _incFailed = true;
+  bool _incNormal = true;
+  bool _incImportant = true;
+  bool _incIntense = true;
 
   String _generateMatrixText(PlannerState state) {
     StringBuffer sb = StringBuffer();
@@ -1472,20 +1653,22 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
 
     List<StudySession> validSessions = state.sessions.where((s) => s.status != SessionStatus.terminated).toList();
     if (_subFilter != null) validSessions = validSessions.where((s) => s.subject == _subFilter).toList();
+    validSessions = validSessions.where((s) => (s.type == SessionType.normal && _incNormal) || (s.type == SessionType.important && _incImportant) || (s.type == SessionType.intense && _incIntense)).toList();
 
     if (_incSessions) {
       sb.writeln("\n>>> SESSIONS DIRECTORY");
       for (var s in validSessions) {
-        sb.writeln("[${s.status.name.toUpperCase()}] ${s.name} | ${s.subject} -> ${s.chapter} (${DateFormat('MM/dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.scheduledStartTime))})");
+        int comp = s.goals.where((g) => g.status == GoalStatus.completed).length;
+        int incomp = s.goals.where((g) => g.status != GoalStatus.completed).length;
+        sb.writeln("[${s.type.name.toUpperCase()}] [${s.status.name.toUpperCase()}] ${s.name} | ${s.subject} -> ${s.chapter} (${DateFormat('MM/dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.scheduledStartTime))})");
+        sb.writeln("    > Pauses: ${s.pauseCount} | Ext: ${s.pausedSeconds}s | Goals Total: ${s.goals.length} (C: $comp, I: $incomp)");
       }
     }
 
     if (_incGoals) {
       sb.writeln("\n>>> GOALS DIRECTORY");
       List<Goal> allGoals =[];
-      if (_scopeFilter == null || _scopeFilter == Scope.session) {
-        allGoals.addAll(validSessions.expand((s) => s.goals));
-      }
+      if (_scopeFilter == null || _scopeFilter == Scope.session) allGoals.addAll(validSessions.expand((s) => s.goals));
       if (_subFilter == null) {
         if (_scopeFilter == null || _scopeFilter == Scope.day) allGoals.addAll(state._days.values.expand((d) => d.overallGoals));
         if (_scopeFilter == null || _scopeFilter == Scope.week) allGoals.addAll(state._weeks.values.expand((w) => w.overallGoals));
@@ -1493,22 +1676,24 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
       for (var g in allGoals) {
         if (!((g.status == GoalStatus.pending && _incPending) || (g.status == GoalStatus.completed && _incCompleted) || (g.status == GoalStatus.failed && _incFailed))) continue;
         String marker = g.status == GoalStatus.pending ? '[ ]' : (g.status == GoalStatus.completed ? '[X]' : '[!]');
-        sb.writeln("$marker ${g.text} | Scope: ${g.scope.name.toUpperCase()} | Sub: ${g.subjectContext.isNotEmpty ? g.subjectContext : 'GLOBAL'}");
+        String sessionName = 'N/A';
+        try { if (g.scope == Scope.session) sessionName = state.sessions.firstWhere((s) => s.id == g.referenceId).name; } catch (_) {}
+        sb.writeln("$marker ${g.text} | Session: $sessionName | Scope: ${g.scope.name.toUpperCase()} | Sub: ${g.subjectContext.isNotEmpty ? g.subjectContext : 'GLOBAL'}");
       }
     }
 
     if (_incRemarks) {
       sb.writeln("\n>>> REMARKS DIRECTORY");
       List<Remark> allRemarks =[];
-      if (_scopeFilter == null || _scopeFilter == Scope.session) {
-        allRemarks.addAll(validSessions.expand((s) => s.remarks));
-      }
+      if (_scopeFilter == null || _scopeFilter == Scope.session) allRemarks.addAll(validSessions.expand((s) => s.remarks));
       if (_subFilter == null) {
         if (_scopeFilter == null || _scopeFilter == Scope.day) allRemarks.addAll(state._days.values.expand((d) => d.overallRemarks));
         if (_scopeFilter == null || _scopeFilter == Scope.week) allRemarks.addAll(state._weeks.values.expand((w) => w.overallRemarks));
       }
       for (var r in allRemarks) {
-        sb.writeln("* ${r.text} | Scope: ${r.scope.name.toUpperCase()} | Sub: ${r.subjectContext.isNotEmpty ? r.subjectContext : 'GLOBAL'} | Time: ${DateFormat('MM/dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(r.timestamp))}");
+        String sessionName = 'N/A';
+        try { if (r.scope == Scope.session) sessionName = state.sessions.firstWhere((s) => s.id == r.referenceId).name; } catch (_) {}
+        sb.writeln("* ${r.text} | Session: $sessionName | Scope: ${r.scope.name.toUpperCase()} | Sub: ${r.subjectContext.isNotEmpty ? r.subjectContext : 'GLOBAL'}");
       }
     }
 
@@ -1535,6 +1720,8 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
                 DropdownButtonFormField<String>(value: _subFilter, decoration: const InputDecoration(labelText: 'SUBJECT FILTER'), items:[const DropdownMenuItem<String>(value: null, child: Text('ALL')), ...state.availableSubjects.map((s) => DropdownMenuItem(value: s, child: Text(s)))], onChanged: (v) => setState(() => _subFilter = v)),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<Scope>(value: _scopeFilter, decoration: const InputDecoration(labelText: 'SCOPE FILTER'), items:[const DropdownMenuItem<Scope>(value: null, child: Text('ALL')), ...Scope.values.map((s) => DropdownMenuItem(value: s, child: Text(s.name.toUpperCase())))], onChanged: (v) => setState(() => _scopeFilter = v)),
+                const Divider(),
+                Row(children:[Expanded(child: CheckboxListTile(title: const Text('NORMAL'), value: _incNormal, activeColor: inkBlack, dense: true, onChanged: (v) => setState(() => _incNormal = v ?? false))), Expanded(child: CheckboxListTile(title: const Text('IMPORTANT'), value: _incImportant, activeColor: importantBlue, dense: true, onChanged: (v) => setState(() => _incImportant = v ?? false))), Expanded(child: CheckboxListTile(title: const Text('INTENSE'), value: _incIntense, activeColor: intensePurple, dense: true, onChanged: (v) => setState(() => _incIntense = v ?? false)))]),
                 const Divider(),
                 CheckboxListTile(title: const Text('INCLUDE SESSIONS'), value: _incSessions, activeColor: inkBlack, onChanged: (v) => setState(() => _incSessions = v ?? false)),
                 CheckboxListTile(title: const Text('INCLUDE REMARKS'), value: _incRemarks, activeColor: inkBlack, onChanged: (v) => setState(() => _incRemarks = v ?? false)),
