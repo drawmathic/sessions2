@@ -23,18 +23,19 @@ void main() {
 // ==========================================
 // CONSTANTS & THEME (BRUTALIST)
 // ==========================================
-final Color paperBg = const Color(0xFFF4F0EB);
-final Color inkBlack = const Color(0xFF1E1E1E);
-final Color brassAccent = const Color(0xFFB58840);
-final Color rustRed = const Color(0xFF9E3C27);
-final Color steamGreen = const Color(0xFF385E38);
-final Color intensePurple = const Color(0xFF5E385E);
-final Color importantBlue = const Color(0xFF384A5E);
+// FIX: Changed from 'final' to 'const' so they can be used in const widget constructors.
+const Color paperBg = Color(0xFFF4F0EB);
+const Color inkBlack = Color(0xFF1E1E1E);
+const Color brassAccent = Color(0xFFB58840);
+const Color rustRed = Color(0xFF9E3C27);
+const Color steamGreen = Color(0xFF385E38);
+const Color intensePurple = Color(0xFF5E385E);
+const Color importantBlue = Color(0xFF384A5E);
 
 final ThemeData brutalistTheme = ThemeData(
   fontFamily: 'Courier',
   scaffoldBackgroundColor: paperBg,
-  colorScheme: ColorScheme.light(
+  colorScheme: const ColorScheme.light(
     primary: inkBlack,
     secondary: brassAccent,
     surface: paperBg,
@@ -43,17 +44,17 @@ final ThemeData brutalistTheme = ThemeData(
     onSecondary: inkBlack,
     onSurface: inkBlack,
   ),
-  appBarTheme: AppBarTheme(
+  appBarTheme: const AppBarTheme(
     backgroundColor: paperBg,
     foregroundColor: inkBlack,
     elevation: 0,
     centerTitle: true,
     shape: Border(bottom: BorderSide(color: inkBlack, width: 3)),
   ),
-  cardTheme: CardThemeData(
+  cardTheme: const CardThemeData(
     color: paperBg,
     elevation: 0,
-    margin: const EdgeInsets.only(bottom: 16),
+    margin: EdgeInsets.only(bottom: 16),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero, side: BorderSide(color: inkBlack, width: 2)),
   ),
   filledButtonTheme: FilledButtonThemeData(
@@ -61,7 +62,7 @@ final ThemeData brutalistTheme = ThemeData(
       backgroundColor: inkBlack,
       foregroundColor: paperBg,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-      side: BorderSide(color: inkBlack, width: 2),
+      side: const BorderSide(color: inkBlack, width: 2),
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
     ),
   ),
@@ -69,24 +70,24 @@ final ThemeData brutalistTheme = ThemeData(
     style: OutlinedButton.styleFrom(
       foregroundColor: inkBlack,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-      side: BorderSide(color: inkBlack, width: 2),
+      side: const BorderSide(color: inkBlack, width: 2),
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
     ),
   ),
-  inputDecorationTheme: InputDecorationTheme(
+  inputDecorationTheme: const InputDecorationTheme(
     filled: true,
     fillColor: paperBg,
     labelStyle: TextStyle(color: inkBlack, fontWeight: FontWeight.bold),
-    border: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
-    enabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
-    focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 3)),
-    disabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black38, width: 2)),
+    border: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
+    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
+    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 3)),
+    disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black38, width: 2)),
   ),
-  dialogTheme: DialogThemeData(
+  dialogTheme: const DialogThemeData(
     backgroundColor: paperBg,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero, side: BorderSide(color: Colors.black, width: 3)),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero, side: BorderSide(color: Colors.black, width: 3)),
   ),
-  dividerTheme: DividerThemeData(color: inkBlack, thickness: 2),
+  dividerTheme: const DividerThemeData(color: inkBlack, thickness: 2),
 );
 
 // ==========================================
@@ -198,7 +199,7 @@ class StudySession {
   int scheduledStartTime; 
   int durationMinutes;
   int pausedSeconds;
-  int elapsedSeconds;
+  int elapsedSeconds; // FIX: This is the elapsed variable used to record actual duration
   bool isPaused;
   SessionType type;
   String subject;
@@ -260,7 +261,7 @@ class PlanNode {
   PlanNode({required this.id, required this.customName, required this.overallGoals, required this.overallRemarks});
   factory PlanNode.fromJson(Map<String, dynamic> json) => PlanNode(
     id: json['id'], customName: json['customName'] ?? '',
-    overallGoals: (json['overallGoals'] as List?)?.map((g) => Goal.fromJson(g)).toList() ?? [],
+    overallGoals: (json['overallGoals'] as List?)?.map((g) => Goal.fromJson(g)).toList() ??[],
     overallRemarks: (json['overallRemarks'] as List?)?.map((r) => Remark.fromJson(r)).toList() ??[],
   );
   Map<String, dynamic> toJson() => {'id': id, 'customName': customName, 'overallGoals': overallGoals.map((g) => g.toJson()).toList(), 'overallRemarks': overallRemarks.map((r) => r.toJson()).toList()};
@@ -492,13 +493,13 @@ class PlannerState extends ChangeNotifier {
   }
 
   PlanNode getDayPlan(String dateId) {
-    if (!_days.containsKey(dateId)) _days[dateId] = PlanNode(id: dateId, customName: '', overallGoals: [], overallRemarks: []);
+    if (!_days.containsKey(dateId)) _days[dateId] = PlanNode(id: dateId, customName: '', overallGoals:[], overallRemarks: []);
     return _days[dateId]!;
   }
   void updateDayPlan(PlanNode plan) { _days[plan.id] = plan; saveUserData(); notifyListeners(); }
   
   PlanNode getWeekPlan(String weekId) {
-    if (!_weeks.containsKey(weekId)) _weeks[weekId] = PlanNode(id: weekId, customName: '', overallGoals: [], overallRemarks: []);
+    if (!_weeks.containsKey(weekId)) _weeks[weekId] = PlanNode(id: weekId, customName: '', overallGoals:[], overallRemarks: []);
     return _weeks[weekId]!;
   }
   void updateWeekPlan(PlanNode plan) { _weeks[plan.id] = plan; saveUserData(); notifyListeners(); }
@@ -533,7 +534,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<PlannerState>();
-    if (state.isLoading) return Scaffold(body: const Center(child: CircularProgressIndicator(color: Colors.black)));
+    if (state.isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator(color: Colors.black)));
     
     return Scaffold(
       body: SafeArea(
@@ -545,7 +546,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         ),
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(border: Border(top: BorderSide(color: inkBlack, width: 3))),
+        decoration: const BoxDecoration(border: Border(top: BorderSide(color: inkBlack, width: 3))),
         child: NavigationBar(
           backgroundColor: paperBg, indicatorColor: brassAccent.withOpacity(0.5),
           selectedIndex: _currentIndex,
@@ -579,7 +580,7 @@ class GlobalActiveSessionBanner extends StatelessWidget {
     double prog = (session.elapsedSeconds / (session.durationMinutes * 60)).clamp(0.0, 1.0);
 
     return Container(
-      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: inkBlack, width: 3)), color: session.isPaused ? rustRed : inkBlack),
+      decoration: BoxDecoration(border: const Border(bottom: BorderSide(color: inkBlack, width: 3)), color: session.isPaused ? rustRed : inkBlack),
       child: Column(
         children:[
           LinearProgressIndicator(value: prog, backgroundColor: Colors.transparent, color: brassAccent, minHeight: 4),
@@ -591,19 +592,19 @@ class GlobalActiveSessionBanner extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children:[
-                      Text('ACTIVE: ${session.name.toUpperCase()}', style: TextStyle(color: paperBg, fontWeight: FontWeight.bold)),
-                      Text('${session.subject} > ${session.chapter}', style: TextStyle(color: Colors.white70, fontSize: 10)),
+                      Text('ACTIVE: ${session.name.toUpperCase()}', style: const TextStyle(color: paperBg, fontWeight: FontWeight.bold)),
+                      Text('${session.subject} > ${session.chapter}', style: const TextStyle(color: Colors.white70, fontSize: 10)),
                     ],
                   ),
                 ),
-                Text(timeStr, style: TextStyle(color: paperBg, fontWeight: FontWeight.bold, fontSize: 24, fontFamily: 'Courier')),
+                Text(timeStr, style: const TextStyle(color: paperBg, fontWeight: FontWeight.bold, fontSize: 24, fontFamily: 'Courier')),
                 const SizedBox(width: 16),
                 IconButton(
                   icon: Icon(session.isPaused ? Icons.play_arrow : Icons.pause, color: paperBg),
                   onPressed: () => state.togglePauseActiveSession(),
                 ),
                 IconButton(
-                  icon: Icon(Icons.open_in_new, color: paperBg),
+                  icon: const Icon(Icons.open_in_new, color: paperBg),
                   onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SessionDetailScreen(session: session))),
                 )
               ],
@@ -733,6 +734,7 @@ class _SessionEditorScreenState extends State<SessionEditorScreen> {
 
   void _save(PlannerState state) {
     if (_nameCtrl.text.isEmpty || _durCtrl.text.isEmpty || _subject == null || _chapter == null) {
+      // FIX: Changed rustRed from final to const at top so this works now
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('MISSING FIELDS'), backgroundColor: rustRed)); return;
     }
     DateTime fullDt = DateTime(_date.year, _date.month, _date.day, _time.hour, _time.minute);
@@ -848,7 +850,7 @@ class SessionDetailScreen extends StatelessWidget {
           IconButton(icon: const Icon(Icons.edit), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SessionEditorScreen(existing: s)))),
           PopupMenuButton(
             icon: const Icon(Icons.more_vert),
-            itemBuilder: (_) =>[const PopupMenuItem(value: 'term', child: Text('TERMINATE OPERATION', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)))],
+            itemBuilder: (_) => const[PopupMenuItem(value: 'term', child: Text('TERMINATE OPERATION', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)))],
             onSelected: (v) { if (v == 'term') _confirmTerminate(context, state, s.id); },
           )
         ],
@@ -958,7 +960,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ],
             ),
           ),
-          TabBar(indicatorColor: brassAccent, labelColor: inkBlack, unselectedLabelColor: Colors.black54, tabs: const[Tab(text: 'DAY LOG'), Tab(text: 'WEEK LOG')]),
+          const TabBar(indicatorColor: brassAccent, labelColor: inkBlack, unselectedLabelColor: Colors.black54, tabs:[Tab(text: 'DAY LOG'), Tab(text: 'WEEK LOG')]),
           Expanded(child: TabBarView(children:[_buildPlanView(state, dayPlan, daySessions, Scope.day, dayId), _buildPlanView(state, weekPlan, [], Scope.week, weekId)])),
         ],
       ),
@@ -1016,8 +1018,13 @@ class SubjectStatsScreen extends StatelessWidget {
     final state = context.watch<PlannerState>();
     final validSessions = state.sessions.where((s) => s.status == SessionStatus.completed).toList();
 
+    // FIX: Using strongly typed map to avoid 'num vs int' coercion errors
     Map<String, int> subHours = {};
-    for (var s in validSessions) subHours[s.subject] = (subHours[s.subject] ?? 0) + s.actualDurationSeconds;
+    for (var s in validSessions) {
+      int currentVal = subHours[s.subject] ?? 0;
+      // FIX: Using elapsedSeconds which replaces actualDurationSeconds
+      subHours[s.subject] = currentVal + s.elapsedSeconds;
+    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -1053,8 +1060,13 @@ class ChapterStatsScreen extends StatelessWidget {
     final chapters = state.getChaptersForSubject(subject);
     final validSessions = state.sessions.where((s) => s.status == SessionStatus.completed && s.subject == subject).toList();
 
+    // FIX: Explicit strong typing to prevent compilation issues with '? ?? 0'
     Map<String, int> chapSecs = {};
-    for (var s in validSessions) chapSecs[s.chapter] = (chapSecs[s.chapter] ?? 0) + s.actualDurationSeconds;
+    for (var s in validSessions) {
+      int currentVal = chapSecs[s.chapter] ?? 0;
+      // FIX: Using elapsedSeconds which replaces actualDurationSeconds
+      chapSecs[s.chapter] = currentVal + s.elapsedSeconds;
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text('TELEMETRY: ${subject.toUpperCase()}')),
@@ -1099,8 +1111,6 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
         goals.addAll(s.goals); remarks.addAll(s.remarks);
       }
     }
-    // Simplification for brevity: day/week goals should ideally be included if requested,
-    // this handles session-scoped which is primary.
     
     sb.writeln("\n>>> GOALS DIRECTORY");
     for (var g in goals) {
