@@ -1,3 +1,4 @@
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -259,6 +260,34 @@ class PlanNode {
 // ==========================================
 // VISUAL UTILITY & WIDGETS
 // ==========================================
+class VoidBoyAvatar extends StatelessWidget {
+  final double size;
+  const VoidBoyAvatar({super.key, this.size = 64});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: inkBlack,
+        shape: BoxShape.rectangle,
+        border: Border.all(color: intensePurple, width: 3),
+        boxShadow:[BoxShadow(color: intensePurple.withOpacity(0.5), blurRadius: 10, spreadRadius: 2)],
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children:[
+          Positioned(top: size * 0.2, left: size * 0.2, child: Container(width: size * 0.2, height: size * 0.15, decoration: BoxDecoration(color: paperBg, border: Border.all(color: steamGreen, width: 2)))),
+          Positioned(top: size * 0.25, right: size * 0.2, child: Container(width: size * 0.15, height: size * 0.1, decoration: BoxDecoration(color: paperBg, border: Border.all(color: rustRed, width: 2)))),
+          Positioned(bottom: size * 0.2, child: Container(width: size * 0.5, height: size * 0.08, color: paperBg)),
+          Positioned(bottom: size * 0.24, child: Container(width: size * 0.5, height: size * 0.02, color: inkBlack)),
+        ],
+      ),
+    );
+  }
+}
+
 class DoubleTapLockIcon extends StatefulWidget {
   final bool isLocked;
   final VoidCallback onLockConfirm;
@@ -476,7 +505,8 @@ class PlannerState extends ChangeNotifier {
       } else {
         s.elapsedSeconds++;
         needsSave = true;
-        if (!s.isBonusMode && s.elapsedSeconds >= s.durationMinutes * 60) {
+        // Strict required time check (Even in Bonus mode)
+        if (s.elapsedSeconds >= s.durationMinutes * 60) {
           s.status = SessionStatus.completed;
           s.completionTime = nowMs;
           requiresOverlapResolve = true;
@@ -592,6 +622,15 @@ class PlannerState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> deleteCustomSubject(String sub) async {
+    if (_currentUser == null) return;
+    _currentUser!.customSubjects.remove(sub);
+    _currentUser!.customChapters.remove(sub);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('sys_users_v8', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    notifyListeners();
+  }
+
   Future<void> addCustomChapter(String sub, String chap) async {
     if (_currentUser == null) return;
     if (!_currentUser!.customChapters.containsKey(sub)) _currentUser!.customChapters[sub] =[];
@@ -600,6 +639,16 @@ class PlannerState extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('sys_users_v8', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
+  }
+
+  Future<void> deleteCustomChapter(String sub, String chap) async {
+    if (_currentUser == null) return;
+    if (_currentUser!.customChapters.containsKey(sub)) {
+      _currentUser!.customChapters[sub]!.remove(chap);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('sys_users_v8', jsonEncode(_users.map((u) => u.toJson()).toList()));
+      notifyListeners();
+    }
   }
 
   void saveSession(StudySession session, {bool isNew = false}) {
@@ -1156,7 +1205,7 @@ class _SessionEditorScreenState extends State<SessionEditorScreen> {
     final state = context.watch<PlannerState>();
     bool isLocked = widget.existing != null && widget.existing!.status != SessionStatus.scheduled;
     if (_subject == null && state.availableSubjects.isNotEmpty) _subject = state.availableSubjects.first;
-    List<String> chapters = _subject != null ? state.getChaptersForSubject(_subject!) : ['General'];
+    List<String> chapters = _subject != null ? state.getChaptersForSubject(_subject!) :['General'];
     if (_chapter == null || !chapters.contains(_chapter)) _chapter = chapters.first;
 
     return Scaffold(
@@ -2083,7 +2132,8 @@ class ProfileScreen extends StatelessWidget {
           const Text('OPERATOR SETTINGS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
           const SizedBox(height: 16),
           Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(children:[
-            const Icon(Icons.person, size: 64), 
+            const VoidBoyAvatar(size: 80), 
+            const SizedBox(height: 16),
             Text(user?.name ?? 'UNKNOWN', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
             const SizedBox(height: 8),
             OutlinedButton(child: const Text('RENAME OPERATOR'), onPressed: () {
@@ -2103,9 +2153,36 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 24),
           const Text('CUSTOM SUBJECTS & CHAPTERS', style: TextStyle(fontWeight: FontWeight.bold)),
           if (user != null) ...user.customSubjects.map((s) => ExpansionTile(
-            title: Text(s, style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children:[
+                Expanded(child: Text(s, style: const TextStyle(fontWeight: FontWeight.bold))),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: rustRed),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('DELETE SUBJECT'),
+                        content: Text('Delete $s and its chapters?'),
+                        actions:[
+                          OutlinedButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
+                          FilledButton(style: FilledButton.styleFrom(backgroundColor: rustRed), onPressed: () { state.deleteCustomSubject(s); Navigator.pop(ctx); }, child: const Text('DELETE'))
+                        ]
+                      )
+                    );
+                  }
+                ),
+              ]
+            ),
             children:[
-              ...user.customChapters[s]?.map((c) => ListTile(title: Text(c, style: const TextStyle(fontSize: 12)))) ??[],
+              ...user.customChapters[s]?.map((c) => ListTile(
+                title: Text(c, style: const TextStyle(fontSize: 12)),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_outline, color: rustRed, size: 20),
+                  onPressed: () => state.deleteCustomChapter(s, c),
+                ),
+              )) ??[],
               Padding(
                 padding: const EdgeInsets.all(8),
                 child: OutlinedButton.icon(icon: const Icon(Icons.add), label: const Text('ADD CHAPTER'), onPressed: () {
