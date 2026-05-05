@@ -35,56 +35,40 @@ final ThemeData brutalistTheme = ThemeData(
   fontFamily: 'Courier',
   scaffoldBackgroundColor: paperBg,
   colorScheme: const ColorScheme.light(
-    primary: inkBlack,
-    secondary: brassAccent,
-    surface: paperBg,
-    error: rustRed,
-    onPrimary: paperBg,
-    onSecondary: inkBlack,
-    onSurface: inkBlack,
+    primary: inkBlack, secondary: brassAccent, surface: paperBg,
+    error: rustRed, onPrimary: paperBg, onSecondary: inkBlack, onSurface: inkBlack,
   ),
   appBarTheme: const AppBarTheme(
-    backgroundColor: paperBg,
-    foregroundColor: inkBlack,
-    elevation: 0,
-    centerTitle: true,
+    backgroundColor: paperBg, foregroundColor: inkBlack, elevation: 0, centerTitle: true,
     shape: Border(bottom: BorderSide(color: inkBlack, width: 3)),
   ),
   cardTheme: const CardThemeData(
-    color: paperBg,
-    elevation: 0,
-    margin: EdgeInsets.only(bottom: 16),
+    color: paperBg, elevation: 0, margin: EdgeInsets.only(bottom: 16),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero, side: BorderSide(color: inkBlack, width: 2)),
   ),
   filledButtonTheme: FilledButtonThemeData(
     style: FilledButton.styleFrom(
-      backgroundColor: inkBlack,
-      foregroundColor: paperBg,
+      backgroundColor: inkBlack, foregroundColor: paperBg,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-      side: const BorderSide(color: inkBlack, width: 2),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      side: const BorderSide(color: inkBlack, width: 2), padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
     ),
   ),
   outlinedButtonTheme: OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(
       foregroundColor: inkBlack,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-      side: const BorderSide(color: inkBlack, width: 2),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      side: const BorderSide(color: inkBlack, width: 2), padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
     ),
   ),
   inputDecorationTheme: const InputDecorationTheme(
-    filled: true,
-    fillColor: paperBg,
-    labelStyle: TextStyle(color: inkBlack, fontWeight: FontWeight.bold),
+    filled: true, fillColor: paperBg, labelStyle: TextStyle(color: inkBlack, fontWeight: FontWeight.bold),
     border: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
     enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
     focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 3)),
     disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black38, width: 2)),
   ),
   dialogTheme: const DialogThemeData(
-    backgroundColor: paperBg,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero, side: BorderSide(color: Colors.black, width: 3)),
+    backgroundColor: paperBg, shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero, side: BorderSide(color: Colors.black, width: 3)),
   ),
   dividerTheme: const DividerThemeData(color: inkBlack, thickness: 2),
 );
@@ -110,40 +94,10 @@ String formatDuration(int totalSeconds) {
 // PCMB DOMAIN DATA
 // ==========================================
 const Map<String, List<String>> pcmbChapters = {
-  'Physics':[
-    'Unit 1: Physical World & Measurement', 'Unit 2: Kinematics', 'Unit 3: Laws of Motion',
-    'Unit 4: Work, Energy & Power', 'Unit 5: System of Particles & Rotational', 'Unit 6: Gravitation',
-    'Unit 7: Properties of Bulk Matter', 'Unit 8: Thermodynamics', 'Unit 9: Kinetic Theory of Gases',
-    'Unit 10: Oscillations & Waves', 'Unit 11: Electrostatics', 'Unit 12: Current Electricity',
-    'Unit 13: Magnetic Effects & Magnetism', 'Unit 14: EMI & AC', 'Unit 15: EM Waves',
-    'Unit 16: Optics', 'Unit 17: Dual Nature of Radiation', 'Unit 18: Atoms & Nuclei', 'Unit 19: Electronic Devices'
-  ],
-  'Chemistry':[
-    'Unit 1: Some Basic Concepts', 'Unit 2: Structure of Atom', 'Unit 3: Classification of Elements',
-    'Unit 4: Chemical Bonding', 'Unit 5: States of Matter', 'Unit 6: Thermodynamics',
-    'Unit 7: Equilibrium', 'Unit 8: Redox Reactions', 'Unit 9: Hydrogen', 'Unit 10: s-Block Elements',
-    'Unit 11: p-Block Elements', 'Unit 12: Organic: Basic Principles', 'Unit 13: Hydrocarbons',
-    'Unit 14: Environmental Chemistry', 'Unit 15: Solid State', 'Unit 16: Solutions',
-    'Unit 17: Electrochemistry', 'Unit 18: Chemical Kinetics', 'Unit 19: Surface Chemistry',
-    'Unit 20: D & F Block', 'Unit 21: Coordination Compounds', 'Unit 22: Haloalkanes/Arenes',
-    'Unit 23: Alcohols/Phenols/Ethers', 'Unit 24: Aldehydes/Ketones/Carboxylic', 'Unit 25: Amines',
-    'Unit 26: Biomolecules', 'Unit 27: Polymers', 'Unit 28: Chemistry in Everyday Life'
-  ],
-  'Math':[
-    'Unit 1: Sets, Relations & Functions', 'Unit 2: Trigonometric Functions', 'Unit 3: Principle of Math Induction',
-    'Unit 4: Complex Numbers & Quad Equations', 'Unit 5: Linear Inequalities', 'Unit 6: Permutations & Combinations',
-    'Unit 7: Binomial Theorem', 'Unit 8: Sequences & Series', 'Unit 9: Straight Lines', 'Unit 10: Conic Sections',
-    'Unit 11: Intro to 3D Geometry', 'Unit 12: Limits & Derivatives', 'Unit 13: Mathematical Reasoning',
-    'Unit 14: Statistics', 'Unit 15: Probability', 'Unit 16: Inverse Trigonometric Functions',
-    'Unit 17: Matrices & Determinants', 'Unit 18: Continuity & Differentiability', 'Unit 19: Applications of Derivatives',
-    'Unit 20: Integrals', 'Unit 21: Applications of Integrals', 'Unit 22: Differential Equations',
-    'Unit 23: Vector Algebra', 'Unit 24: 3D Geometry (Class 12)', 'Unit 25: Linear Programming'
-  ],
-  'Biology':[
-    'Unit 1: Diversity in Living World', 'Unit 2: Structural Organization', 'Unit 3: Cell Structure & Function',
-    'Unit 4: Plant Physiology', 'Unit 5: Human Physiology', 'Unit 6: Reproduction',
-    'Unit 7: Genetics & Evolution', 'Unit 8: Biology & Human Welfare', 'Unit 9: Biotechnology', 'Unit 10: Ecology'
-  ]
+  'Physics':['Unit 1: Physical World & Measurement', 'Unit 2: Kinematics', 'Unit 3: Laws of Motion', 'Unit 4: Work, Energy & Power', 'Unit 5: System of Particles & Rotational', 'Unit 6: Gravitation', 'Unit 7: Properties of Bulk Matter', 'Unit 8: Thermodynamics', 'Unit 9: Kinetic Theory of Gases', 'Unit 10: Oscillations & Waves', 'Unit 11: Electrostatics', 'Unit 12: Current Electricity', 'Unit 13: Magnetic Effects & Magnetism', 'Unit 14: EMI & AC', 'Unit 15: EM Waves', 'Unit 16: Optics', 'Unit 17: Dual Nature of Radiation', 'Unit 18: Atoms & Nuclei', 'Unit 19: Electronic Devices'],
+  'Chemistry':['Unit 1: Some Basic Concepts', 'Unit 2: Structure of Atom', 'Unit 3: Classification of Elements', 'Unit 4: Chemical Bonding', 'Unit 5: States of Matter', 'Unit 6: Thermodynamics', 'Unit 7: Equilibrium', 'Unit 8: Redox Reactions', 'Unit 9: Hydrogen', 'Unit 10: s-Block Elements', 'Unit 11: p-Block Elements', 'Unit 12: Organic: Basic Principles', 'Unit 13: Hydrocarbons', 'Unit 14: Environmental Chemistry', 'Unit 15: Solid State', 'Unit 16: Solutions', 'Unit 17: Electrochemistry', 'Unit 18: Chemical Kinetics', 'Unit 19: Surface Chemistry', 'Unit 20: D & F Block', 'Unit 21: Coordination Compounds', 'Unit 22: Haloalkanes/Arenes', 'Unit 23: Alcohols/Phenols/Ethers', 'Unit 24: Aldehydes/Ketones/Carboxylic', 'Unit 25: Amines', 'Unit 26: Biomolecules', 'Unit 27: Polymers', 'Unit 28: Chemistry in Everyday Life'],
+  'Math':['Unit 1: Sets, Relations & Functions', 'Unit 2: Trigonometric Functions', 'Unit 3: Principle of Math Induction', 'Unit 4: Complex Numbers & Quad Equations', 'Unit 5: Linear Inequalities', 'Unit 6: Permutations & Combinations', 'Unit 7: Binomial Theorem', 'Unit 8: Sequences & Series', 'Unit 9: Straight Lines', 'Unit 10: Conic Sections', 'Unit 11: Intro to 3D Geometry', 'Unit 12: Limits & Derivatives', 'Unit 13: Mathematical Reasoning', 'Unit 14: Statistics', 'Unit 15: Probability', 'Unit 16: Inverse Trigonometric Functions', 'Unit 17: Matrices & Determinants', 'Unit 18: Continuity & Differentiability', 'Unit 19: Applications of Derivatives', 'Unit 20: Integrals', 'Unit 21: Applications of Integrals', 'Unit 22: Differential Equations', 'Unit 23: Vector Algebra', 'Unit 24: 3D Geometry (Class 12)', 'Unit 25: Linear Programming'],
+  'Biology':['Unit 1: Diversity in Living World', 'Unit 2: Structural Organization', 'Unit 3: Cell Structure & Function', 'Unit 4: Plant Physiology', 'Unit 5: Human Physiology', 'Unit 6: Reproduction', 'Unit 7: Genetics & Evolution', 'Unit 8: Biology & Human Welfare', 'Unit 9: Biotechnology', 'Unit 10: Ecology']
 };
 
 // ==========================================
@@ -158,14 +112,21 @@ class UserProfile {
   final String id;
   String name;
   List<String> customSubjects;
+  Map<String, List<String>> customChapters;
 
-  UserProfile({required this.id, required this.name, required this.customSubjects});
-  factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
-        id: json['id'],
-        name: json['name'],
-        customSubjects: List<String>.from(json['customSubjects'] ??[]),
-      );
-  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'customSubjects': customSubjects};
+  UserProfile({required this.id, required this.name, required this.customSubjects, required this.customChapters});
+  factory UserProfile.fromJson(Map<String, dynamic> json) {
+    Map<String, List<String>> cChaps = {};
+    if (json['customChapters'] != null) {
+      (json['customChapters'] as Map).forEach((k, v) => cChaps[k.toString()] = List<String>.from(v));
+    }
+    return UserProfile(
+      id: json['id'], name: json['name'],
+      customSubjects: List<String>.from(json['customSubjects'] ??[]),
+      customChapters: cChaps,
+    );
+  }
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'customSubjects': customSubjects, 'customChapters': customChapters};
 }
 
 class Goal {
@@ -173,26 +134,24 @@ class Goal {
   String text;
   GoalStatus status;
   bool isLocked;
+  bool isBonus;
   Scope scope;
   String referenceId;
   String subjectContext;
   int timestamp;
 
-  Goal({required this.id, required this.text, this.status = GoalStatus.pending, this.isLocked = false, required this.scope, required this.referenceId, this.subjectContext = '', required this.timestamp});
+  Goal({required this.id, required this.text, this.status = GoalStatus.pending, this.isLocked = false, this.isBonus = false, required this.scope, required this.referenceId, this.subjectContext = '', required this.timestamp});
   factory Goal.fromJson(Map<String, dynamic> json) => Goal(
-        id: json['id'],
-        text: json['text'],
+        id: json['id'], text: json['text'],
         status: GoalStatus.values.firstWhere((e) => e.toString() == json['status'], orElse: () => GoalStatus.pending),
-        isLocked: json['isLocked'] ?? false,
+        isLocked: json['isLocked'] ?? false, isBonus: json['isBonus'] ?? false,
         scope: Scope.values.firstWhere((e) => e.toString() == json['scope'], orElse: () => Scope.session),
-        referenceId: json['referenceId'] ?? '',
-        subjectContext: json['subjectContext'] ?? '',
+        referenceId: json['referenceId'] ?? '', subjectContext: json['subjectContext'] ?? '',
         timestamp: json['timestamp'] ?? DateTime.now().millisecondsSinceEpoch,
       );
   Map<String, dynamic> toJson() => {
-        'id': id, 'text': text, 'status': status.toString(), 'isLocked': isLocked,
-        'scope': scope.toString(), 'referenceId': referenceId, 'subjectContext': subjectContext,
-        'timestamp': timestamp,
+        'id': id, 'text': text, 'status': status.toString(), 'isLocked': isLocked, 'isBonus': isBonus,
+        'scope': scope.toString(), 'referenceId': referenceId, 'subjectContext': subjectContext, 'timestamp': timestamp,
       };
 }
 
@@ -206,12 +165,9 @@ class Remark {
 
   Remark({required this.id, required this.text, required this.timestamp, required this.scope, required this.referenceId, this.subjectContext = ''});
   factory Remark.fromJson(Map<String, dynamic> json) => Remark(
-        id: json['id'],
-        text: json['text'],
-        timestamp: json['timestamp'],
+        id: json['id'], text: json['text'], timestamp: json['timestamp'],
         scope: Scope.values.firstWhere((e) => e.toString() == json['scope'], orElse: () => Scope.session),
-        referenceId: json['referenceId'] ?? '',
-        subjectContext: json['subjectContext'] ?? '',
+        referenceId: json['referenceId'] ?? '', subjectContext: json['subjectContext'] ?? '',
       );
   Map<String, dynamic> toJson() => {
         'id': id, 'text': text, 'timestamp': timestamp, 'scope': scope.toString(), 'referenceId': referenceId, 'subjectContext': subjectContext,
@@ -229,6 +185,7 @@ class StudySession {
   int elapsedSeconds; 
   int pauseCount;
   bool isPaused;
+  bool isBonusMode;
   SessionType type;
   String subject;
   String chapter;
@@ -240,25 +197,19 @@ class StudySession {
   StudySession({
     required this.id, required this.name, required this.description,
     required this.baseStartTime, required this.scheduledStartTime, required this.durationMinutes,
-    this.pausedSeconds = 0, this.elapsedSeconds = 0, this.pauseCount = 0, this.isPaused = false,
+    this.pausedSeconds = 0, this.elapsedSeconds = 0, this.pauseCount = 0, this.isPaused = false, this.isBonusMode = false,
     required this.type, required this.subject, required this.chapter,
     required this.goals, required this.remarks, this.status = SessionStatus.scheduled, this.completionTime,
   });
 
   factory StudySession.fromJson(Map<String, dynamic> json) => StudySession(
-        id: json['id'],
-        name: json['name'],
-        description: json['description'],
+        id: json['id'], name: json['name'], description: json['description'],
         baseStartTime: json['baseStartTime'] ?? json['scheduledStartTime'],
-        scheduledStartTime: json['scheduledStartTime'],
-        durationMinutes: json['durationMinutes'],
-        pausedSeconds: json['pausedSeconds'] ?? 0,
-        elapsedSeconds: json['elapsedSeconds'] ?? 0,
-        pauseCount: json['pauseCount'] ?? 0,
-        isPaused: json['isPaused'] ?? false,
+        scheduledStartTime: json['scheduledStartTime'], durationMinutes: json['durationMinutes'],
+        pausedSeconds: json['pausedSeconds'] ?? 0, elapsedSeconds: json['elapsedSeconds'] ?? 0,
+        pauseCount: json['pauseCount'] ?? 0, isPaused: json['isPaused'] ?? false, isBonusMode: json['isBonusMode'] ?? false,
         type: SessionType.values.firstWhere((e) => e.toString() == json['type'], orElse: () => SessionType.normal),
-        subject: json['subject'],
-        chapter: json['chapter'] ?? 'General',
+        subject: json['subject'], chapter: json['chapter'] ?? 'General',
         goals: (json['goals'] as List).map((g) => Goal.fromJson(g)).toList(),
         remarks: (json['remarks'] as List).map((r) => Remark.fromJson(r)).toList(),
         status: SessionStatus.values.firstWhere((e) => e.toString() == json['status'], orElse: () => SessionStatus.scheduled),
@@ -268,7 +219,7 @@ class StudySession {
   Map<String, dynamic> toJson() => {
         'id': id, 'name': name, 'description': description, 'baseStartTime': baseStartTime,
         'scheduledStartTime': scheduledStartTime, 'durationMinutes': durationMinutes,
-        'pausedSeconds': pausedSeconds, 'elapsedSeconds': elapsedSeconds, 'pauseCount': pauseCount, 'isPaused': isPaused,
+        'pausedSeconds': pausedSeconds, 'elapsedSeconds': elapsedSeconds, 'pauseCount': pauseCount, 'isPaused': isPaused, 'isBonusMode': isBonusMode,
         'type': type.toString(), 'subject': subject, 'chapter': chapter,
         'goals': goals.map((g) => g.toJson()).toList(), 'remarks': remarks.map((r) => r.toJson()).toList(),
         'status': status.toString(), 'completionTime': completionTime,
@@ -294,8 +245,7 @@ class PlanNode {
   List<Remark> overallRemarks;
   PlanNode({required this.id, required this.customName, required this.overallGoals, required this.overallRemarks});
   factory PlanNode.fromJson(Map<String, dynamic> json) => PlanNode(
-        id: json['id'],
-        customName: json['customName'] ?? '',
+        id: json['id'], customName: json['customName'] ?? '',
         overallGoals: (json['overallGoals'] as List?)?.map((g) => Goal.fromJson(g)).toList() ??[],
         overallRemarks: (json['overallRemarks'] as List?)?.map((r) => Remark.fromJson(r)).toList() ??[],
       );
@@ -309,14 +259,47 @@ class PlanNode {
 // ==========================================
 // VISUAL UTILITY & WIDGETS
 // ==========================================
+class DoubleTapLockIcon extends StatefulWidget {
+  final bool isLocked;
+  final VoidCallback onLockConfirm;
+  const DoubleTapLockIcon({super.key, required this.isLocked, required this.onLockConfirm});
+  @override
+  State<DoubleTapLockIcon> createState() => _DoubleTapLockIconState();
+}
+class _DoubleTapLockIconState extends State<DoubleTapLockIcon> {
+  bool _primed = false;
+  Timer? _timer;
+  void _handleTap() {
+    if (widget.isLocked) return; // Cannot unlock once locked. 
+    if (_primed) {
+      _timer?.cancel();
+      setState(() => _primed = false);
+      widget.onLockConfirm();
+    } else {
+      setState(() => _primed = true);
+      _timer = Timer(const Duration(seconds: 2), () { if(mounted) setState(() => _primed = false); });
+    }
+  }
+  @override
+  void dispose() { _timer?.cancel(); super.dispose(); }
+  @override
+  Widget build(BuildContext context) {
+    if (widget.isLocked) return const Icon(Icons.lock, color: rustRed);
+    return IconButton(
+      icon: Icon(_primed ? Icons.warning : Icons.lock_open, color: _primed ? brassAccent : Colors.black38),
+      onPressed: _handleTap,
+      tooltip: _primed ? 'TAP AGAIN TO LOCK PERMANENTLY' : 'DOUBLE TAP TO LOCK',
+    );
+  }
+}
+
 class VisualTileBuilder extends StatelessWidget {
   final Goal? goal;
   final Remark? remark;
   final PlannerState state;
-  final VoidCallback? onTap;
-  final VoidCallback? onSecondaryTap;
+  final VoidCallback? onGoalStatusCycle;
 
-  const VisualTileBuilder({super.key, this.goal, this.remark, required this.state, this.onTap, this.onSecondaryTap});
+  const VisualTileBuilder({super.key, this.goal, this.remark, required this.state, this.onGoalStatusCycle});
 
   @override
   Widget build(BuildContext context) {
@@ -325,6 +308,7 @@ class VisualTileBuilder extends StatelessWidget {
     String refId = isGoal ? goal!.referenceId : remark!.referenceId;
     String text = isGoal ? goal!.text : remark!.text;
     int timestamp = isGoal ? goal!.timestamp : remark!.timestamp;
+    bool isBonus = isGoal ? goal!.isBonus : false;
 
     String sourceName = '';
     Color borderColor = inkBlack;
@@ -334,24 +318,16 @@ class VisualTileBuilder extends StatelessWidget {
       try {
         final s = state.sessions.firstWhere((x) => x.id == refId);
         sourceName = s.name.toUpperCase();
-        if (s.type == SessionType.important) { borderColor = importantBlue; tagLabel = '[IMPORTANT SESSION]'; }
-        else if (s.type == SessionType.intense) { borderColor = intensePurple; tagLabel = '[INTENSE SESSION]'; }
-        else { borderColor = inkBlack; tagLabel = '[NORMAL SESSION]'; }
+        if (s.type == SessionType.important) { borderColor = importantBlue; tagLabel = '[IMPORTANT SESS]'; }
+        else if (s.type == SessionType.intense) { borderColor = intensePurple; tagLabel = '[INTENSE SESS]'; }
+        else { borderColor = inkBlack; tagLabel = '[NORMAL SESS]'; }
       } catch (_) { sourceName = '[DELETED SESSION]'; tagLabel = '[SESSION]'; }
     } else if (scope == Scope.day) {
-      try {
-        final d = state.days[refId];
-        sourceName = (d != null && d.customName.isNotEmpty) ? d.customName.toUpperCase() : 'DAY: $refId';
-      } catch (_) { sourceName = 'DAY: $refId'; }
-      borderColor = steamGreen;
-      tagLabel = '[DAY SCOPE]';
+      try { final d = state.days[refId]; sourceName = (d != null && d.customName.isNotEmpty) ? d.customName.toUpperCase() : 'DAY: $refId'; } catch (_) { sourceName = 'DAY: $refId'; }
+      borderColor = steamGreen; tagLabel = '[DAY SCOPE]';
     } else if (scope == Scope.week) {
-      try {
-        final w = state.weeks[refId];
-        sourceName = (w != null && w.customName.isNotEmpty) ? w.customName.toUpperCase() : 'WEEK: $refId';
-      } catch (_) { sourceName = 'WEEK: $refId'; }
-      borderColor = brassAccent;
-      tagLabel = '[WEEK SCOPE]';
+      try { final w = state.weeks[refId]; sourceName = (w != null && w.customName.isNotEmpty) ? w.customName.toUpperCase() : 'WEEK: $refId'; } catch (_) { sourceName = 'WEEK: $refId'; }
+      borderColor = brassAccent; tagLabel = '[WEEK SCOPE]';
     }
 
     Widget leadingIcon;
@@ -364,32 +340,49 @@ class VisualTileBuilder extends StatelessWidget {
     }
 
     return Card(
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(border: Border(left: BorderSide(color: borderColor, width: 8))),
-          child: ListTile(
-            leading: isGoal ? IconButton(icon: leadingIcon, onPressed: goal!.isLocked ? null : onSecondaryTap) : leadingIcon,
-            title: Text(text, style: TextStyle(
-              fontWeight: FontWeight.bold,
-              decoration: isGoal && goal!.status == GoalStatus.completed ? TextDecoration.lineThrough : null,
-              color: isGoal && goal!.status == GoalStatus.failed ? rustRed : inkBlack,
-            )),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children:[
-                const SizedBox(height: 4),
-                Text('$tagLabel SRC: $sourceName', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: borderColor)),
-                Text(DateFormat('MM/dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(timestamp)), style: const TextStyle(fontSize: 10, color: Colors.black54)),
-              ],
-            ),
-            trailing: isGoal 
-              ? IconButton(icon: Icon(goal!.isLocked ? Icons.lock : Icons.lock_open, color: goal!.isLocked ? rustRed : Colors.black38), onPressed: goal!.isLocked ? null : onTap)
-              : null,
+      child: Container(
+        decoration: BoxDecoration(border: Border(left: BorderSide(color: borderColor, width: 8))),
+        child: ListTile(
+          leading: isGoal ? IconButton(icon: leadingIcon, onPressed: goal!.isLocked ? null : onGoalStatusCycle) : leadingIcon,
+          title: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children:[
+              Text(text, style: TextStyle(
+                fontWeight: FontWeight.bold,
+                decoration: isGoal && goal!.status == GoalStatus.completed ? TextDecoration.lineThrough : null,
+                color: isGoal && goal!.status == GoalStatus.failed ? rustRed : inkBlack,
+              )),
+              if (isBonus) Padding(padding: const EdgeInsets.only(left: 8), child: Container(padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2), decoration: const BoxDecoration(color: brassAccent), child: const Text('BONUS', style: TextStyle(fontSize: 10, color: paperBg, fontWeight: FontWeight.bold)))),
+            ],
           ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:[
+              const SizedBox(height: 4),
+              Text('$tagLabel SRC: $sourceName', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: borderColor)),
+              Text(DateFormat('MM/dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(timestamp)), style: const TextStyle(fontSize: 10, color: Colors.black54)),
+            ],
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children:[
+              if (isGoal) DoubleTapLockIcon(isLocked: goal!.isLocked, onLockConfirm: () => state.lockGoal(goal!)),
+              IconButton(icon: const Icon(Icons.delete_outline, color: rustRed), onPressed: () => _confirmDelete(context, state, isGoal, isGoal ? goal : remark)),
+            ],
+          )
         ),
       ),
     );
+  }
+
+  void _confirmDelete(BuildContext context, PlannerState state, bool isGoal, dynamic item) {
+    showDialog(context: context, builder: (ctx) => AlertDialog(
+      title: const Text('CONFIRM DELETE'), content: const Text('THIS DATA WILL BE PERMANENTLY ERASED.'),
+      actions:[
+        OutlinedButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
+        FilledButton(style: FilledButton.styleFrom(backgroundColor: rustRed), onPressed: () { state.deleteItem(isGoal, item); Navigator.pop(ctx); }, child: const Text('DELETE'))
+      ]
+    ));
   }
 }
 
@@ -420,8 +413,13 @@ class PlannerState extends ChangeNotifier {
   }
 
   List<String> getChaptersForSubject(String subject) {
-    if (pcmbChapters.containsKey(subject)) return pcmbChapters[subject]!;
-    return ['General'];
+    List<String> combined =[];
+    if (pcmbChapters.containsKey(subject)) combined.addAll(pcmbChapters[subject]!);
+    if (_currentUser != null && _currentUser!.customChapters.containsKey(subject)) {
+      combined.addAll(_currentUser!.customChapters[subject]!);
+    }
+    if (combined.isEmpty) combined.add('General');
+    return combined.toSet().toList();
   }
 
   StudySession? get activeSession {
@@ -431,15 +429,15 @@ class PlannerState extends ChangeNotifier {
 
   Future<void> initSystem() async {
     final prefs = await SharedPreferences.getInstance();
-    final usersJson = prefs.getString('sys_users_v6');
+    final usersJson = prefs.getString('sys_users_v7');
     if (usersJson != null) {
       _users = (jsonDecode(usersJson) as List).map((u) => UserProfile.fromJson(u)).toList();
     }
     if (_users.isEmpty) {
-      _users.add(UserProfile(id: 'usr_${DateTime.now().millisecondsSinceEpoch}', name: 'OPERATOR_01', customSubjects:[]));
-      await prefs.setString('sys_users_v6', jsonEncode(_users.map((u) => u.toJson()).toList()));
+      _users.add(UserProfile(id: 'usr_${DateTime.now().millisecondsSinceEpoch}', name: 'OPERATOR_01', customSubjects:[], customChapters: {}));
+      await prefs.setString('sys_users_v7', jsonEncode(_users.map((u) => u.toJson()).toList()));
     }
-    final lastUserId = prefs.getString('last_user_id_v6') ?? _users.first.id;
+    final lastUserId = prefs.getString('last_user_id_v7') ?? _users.first.id;
     _currentUser = _users.firstWhere((u) => u.id == lastUserId, orElse: () => _users.first);
     await loadUserData(_currentUser!.id);
 
@@ -470,7 +468,7 @@ class PlannerState extends ChangeNotifier {
       } else {
         s.elapsedSeconds++;
         needsSave = true;
-        if (s.elapsedSeconds >= s.durationMinutes * 60) {
+        if (!s.isBonusMode && s.elapsedSeconds >= s.durationMinutes * 60) {
           s.status = SessionStatus.completed;
           s.completionTime = nowMs;
           requiresOverlapResolve = true;
@@ -486,10 +484,7 @@ class PlannerState extends ChangeNotifier {
     if (needsSave) {
       notifyListeners();
       _saveCounter++;
-      if (_saveCounter > 5) {
-        saveUserData();
-        _saveCounter = 0;
-      }
+      if (_saveCounter > 5) { saveUserData(); _saveCounter = 0; }
     }
   }
 
@@ -512,7 +507,7 @@ class PlannerState extends ChangeNotifier {
         }
       } else {
         if (currEnd > next.scheduledStartTime && next.status == SessionStatus.scheduled) {
-          next.scheduledStartTime = currEnd + 60000; 
+          next.scheduledStartTime = currEnd + 60000; // Exact 1 min gap ONLY when overlapping dynamically
         }
       }
     }
@@ -532,22 +527,14 @@ class PlannerState extends ChangeNotifier {
 
   Future<void> loadUserData(String uid) async {
     final prefs = await SharedPreferences.getInstance();
-    final sJson = prefs.getString('sessions_v6_$uid');
+    final sJson = prefs.getString('sessions_v7_$uid');
     _sessions = sJson != null ? (jsonDecode(sJson) as List).map((s) => StudySession.fromJson(s)).toList() :[];
 
-    final dJson = prefs.getString('days_v6_$uid');
-    if (dJson != null) {
-      _days = (jsonDecode(dJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v)));
-    } else {
-      _days = {};
-    }
+    final dJson = prefs.getString('days_v7_$uid');
+    if (dJson != null) _days = (jsonDecode(dJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v))); else _days = {};
 
-    final wJson = prefs.getString('weeks_v6_$uid');
-    if (wJson != null) {
-      _weeks = (jsonDecode(wJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v)));
-    } else {
-      _weeks = {};
-    }
+    final wJson = prefs.getString('weeks_v7_$uid');
+    if (wJson != null) _weeks = (jsonDecode(wJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v))); else _weeks = {};
 
     _isLoading = false;
     notifyListeners();
@@ -557,23 +544,23 @@ class PlannerState extends ChangeNotifier {
     if (_currentUser == null) return;
     final uid = _currentUser!.id;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sessions_v6_$uid', jsonEncode(_sessions.map((s) => s.toJson()).toList()));
-    await prefs.setString('days_v6_$uid', jsonEncode(_days.map((k, v) => MapEntry(k, v.toJson()))));
-    await prefs.setString('weeks_v6_$uid', jsonEncode(_weeks.map((k, v) => MapEntry(k, v.toJson()))));
+    await prefs.setString('sessions_v7_$uid', jsonEncode(_sessions.map((s) => s.toJson()).toList()));
+    await prefs.setString('days_v7_$uid', jsonEncode(_days.map((k, v) => MapEntry(k, v.toJson()))));
+    await prefs.setString('weeks_v7_$uid', jsonEncode(_weeks.map((k, v) => MapEntry(k, v.toJson()))));
   }
 
   Future<void> switchUser(String id) async {
     _isLoading = true; notifyListeners();
     _currentUser = _users.firstWhere((u) => u.id == id);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_user_id_v6', _currentUser!.id);
+    await prefs.setString('last_user_id_v7', _currentUser!.id);
     await loadUserData(_currentUser!.id);
   }
 
   Future<void> createUser(String name) async {
-    _users.add(UserProfile(id: 'usr_${DateTime.now().millisecondsSinceEpoch}', name: name, customSubjects:[]));
+    _users.add(UserProfile(id: 'usr_${DateTime.now().millisecondsSinceEpoch}', name: name, customSubjects:[], customChapters: {}));
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sys_users_v6', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    await prefs.setString('sys_users_v7', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
   }
 
@@ -583,7 +570,7 @@ class PlannerState extends ChangeNotifier {
       int idx = _users.indexWhere((u) => u.id == _currentUser!.id);
       if (idx != -1) _users[idx] = _currentUser!;
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('sys_users_v6', jsonEncode(_users.map((u) => u.toJson()).toList()));
+      await prefs.setString('sys_users_v7', jsonEncode(_users.map((u) => u.toJson()).toList()));
       notifyListeners();
     }
   }
@@ -591,22 +578,30 @@ class PlannerState extends ChangeNotifier {
   Future<void> addCustomSubject(String sub) async {
     if (_currentUser == null || _currentUser!.customSubjects.contains(sub)) return;
     _currentUser!.customSubjects.add(sub);
+    _currentUser!.customChapters[sub] =[];
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sys_users_v6', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    await prefs.setString('sys_users_v7', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    notifyListeners();
+  }
+
+  Future<void> addCustomChapter(String sub, String chap) async {
+    if (_currentUser == null) return;
+    if (!_currentUser!.customChapters.containsKey(sub)) _currentUser!.customChapters[sub] =[];
+    if (_currentUser!.customChapters[sub]!.contains(chap)) return;
+    _currentUser!.customChapters[sub]!.add(chap);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('sys_users_v7', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
   }
 
   void saveSession(StudySession session, {bool isNew = false}) {
-    if (isNew) {
-      _sessions.add(session);
-    } else {
+    if (isNew) { _sessions.add(session); } else {
       int idx = _sessions.indexWhere((s) => s.id == session.id);
       if (idx != -1) _sessions[idx] = session;
     }
     _sessions.sort((a, b) => a.scheduledStartTime.compareTo(b.scheduledStartTime));
     _resolveOverlapsForDay(session.dateId);
-    saveUserData();
-    notifyListeners();
+    saveUserData(); notifyListeners();
   }
 
   void togglePauseActiveSession() {
@@ -614,9 +609,13 @@ class PlannerState extends ChangeNotifier {
     if (act != null) {
       if (!act.isPaused) act.pauseCount++;
       act.isPaused = !act.isPaused;
-      saveUserData();
-      notifyListeners();
+      saveUserData(); notifyListeners();
     }
+  }
+
+  void setSessionBonusMode(String id) {
+    int idx = _sessions.indexWhere((s) => s.id == id);
+    if (idx != -1) { _sessions[idx].isBonusMode = true; saveUserData(); notifyListeners(); }
   }
 
   void terminateSession(String id) {
@@ -625,8 +624,7 @@ class PlannerState extends ChangeNotifier {
       _sessions[idx].status = SessionStatus.terminated;
       _sessions[idx].completionTime = DateTime.now().millisecondsSinceEpoch;
       _resolveOverlapsForDay(_sessions[idx].dateId);
-      saveUserData();
-      notifyListeners();
+      saveUserData(); notifyListeners();
     }
   }
 
@@ -636,73 +634,208 @@ class PlannerState extends ChangeNotifier {
       _sessions[idx].status = SessionStatus.completed;
       _sessions[idx].completionTime = DateTime.now().millisecondsSinceEpoch;
       _resolveOverlapsForDay(_sessions[idx].dateId);
-      saveUserData();
-      notifyListeners();
+      saveUserData(); notifyListeners();
     }
   }
 
   void addGoalToSession(String sessionId, String text) {
     int sIdx = _sessions.indexWhere((s) => s.id == sessionId);
     if (sIdx != -1) {
-      _sessions[sIdx].goals.add(Goal(id: DateTime.now().millisecondsSinceEpoch.toString(), text: text, scope: Scope.session, referenceId: sessionId, subjectContext: _sessions[sIdx].subject, timestamp: DateTime.now().millisecondsSinceEpoch));
-      saveUserData();
-      notifyListeners();
+      _sessions[sIdx].goals.add(Goal(id: DateTime.now().millisecondsSinceEpoch.toString(), text: text, scope: Scope.session, referenceId: sessionId, subjectContext: _sessions[sIdx].subject, timestamp: DateTime.now().millisecondsSinceEpoch, isBonus: _sessions[sIdx].isBonusMode));
+      saveUserData(); notifyListeners();
     }
   }
 
-  void markGoal(String sessionId, String goalId, GoalStatus status) {
-    int sIdx = _sessions.indexWhere((s) => s.id == sessionId);
-    if (sIdx != -1) {
-      int gIdx = _sessions[sIdx].goals.indexWhere((g) => g.id == goalId);
-      if (gIdx != -1 && !_sessions[sIdx].goals[gIdx].isLocked) {
-        _sessions[sIdx].goals[gIdx].status = status;
-        saveUserData();
-        notifyListeners();
-      }
-    }
-  }
-
-  void lockGoal(String sessionId, String goalId) {
-    int sIdx = _sessions.indexWhere((s) => s.id == sessionId);
-    if (sIdx != -1) {
-      int gIdx = _sessions[sIdx].goals.indexWhere((g) => g.id == goalId);
-      if (gIdx != -1) {
-        _sessions[sIdx].goals[gIdx].isLocked = true;
-        saveUserData();
-        notifyListeners();
-      }
-    }
+  void lockGoal(Goal goal) {
+    goal.isLocked = true;
+    saveUserData(); notifyListeners();
   }
 
   void addSessionRemark(String sessionId, String text) {
     int sIdx = _sessions.indexWhere((s) => s.id == sessionId);
     if (sIdx != -1) {
       _sessions[sIdx].remarks.add(Remark(id: DateTime.now().millisecondsSinceEpoch.toString(), text: text, timestamp: DateTime.now().millisecondsSinceEpoch, scope: Scope.session, referenceId: sessionId, subjectContext: _sessions[sIdx].subject));
-      saveUserData();
-      notifyListeners();
+      saveUserData(); notifyListeners();
     }
   }
 
-  PlanNode getDayPlan(String dateId) {
-    if (!_days.containsKey(dateId)) _days[dateId] = PlanNode(id: dateId, customName: '', overallGoals:[], overallRemarks:[]);
-    return _days[dateId]!;
+  void deleteItem(bool isGoal, dynamic item) {
+    Scope scope = isGoal ? (item as Goal).scope : (item as Remark).scope;
+    String refId = isGoal ? (item as Goal).referenceId : (item as Remark).referenceId;
+    String id = isGoal ? (item as Goal).id : (item as Remark).id;
+
+    if (scope == Scope.session) {
+      int sIdx = _sessions.indexWhere((s) => s.id == refId);
+      if (sIdx != -1) {
+        if (isGoal) _sessions[sIdx].goals.removeWhere((g) => g.id == id);
+        else _sessions[sIdx].remarks.removeWhere((r) => r.id == id);
+      }
+    } else if (scope == Scope.day) {
+      if (_days.containsKey(refId)) {
+        if (isGoal) _days[refId]!.overallGoals.removeWhere((g) => g.id == id);
+        else _days[refId]!.overallRemarks.removeWhere((r) => r.id == id);
+      }
+    } else {
+      if (_weeks.containsKey(refId)) {
+        if (isGoal) _weeks[refId]!.overallGoals.removeWhere((g) => g.id == id);
+        else _weeks[refId]!.overallRemarks.removeWhere((r) => r.id == id);
+      }
+    }
+    saveUserData(); notifyListeners();
   }
 
-  void updateDayPlan(PlanNode plan) {
-    _days[plan.id] = plan;
-    saveUserData();
-    notifyListeners();
+  PlanNode getDayPlan(String dateId) {
+    if (!_days.containsKey(dateId)) _days[dateId] = PlanNode(id: dateId, customName: '', overallGoals:[], overallRemarks: []);
+    return _days[dateId]!;
   }
+  void updateDayPlan(PlanNode plan) { _days[plan.id] = plan; saveUserData(); notifyListeners(); }
 
   PlanNode getWeekPlan(String weekId) {
     if (!_weeks.containsKey(weekId)) _weeks[weekId] = PlanNode(id: weekId, customName: '', overallGoals:[], overallRemarks: []);
     return _weeks[weekId]!;
   }
+  void updateWeekPlan(PlanNode plan) { _weeks[plan.id] = plan; saveUserData(); notifyListeners(); }
+}
 
-  void updateWeekPlan(PlanNode plan) {
-    _weeks[plan.id] = plan;
-    saveUserData();
-    notifyListeners();
+// ==========================================
+// FILTER ENGINE & SORT WIDGET (REUSABLE)
+// ==========================================
+class AdvancedFilterEngine extends StatefulWidget {
+  final PlannerState state;
+  final List<dynamic> items; 
+  final String title;
+  const AdvancedFilterEngine({super.key, required this.state, required this.items, required this.title});
+  @override
+  State<AdvancedFilterEngine> createState() => _AdvancedFilterEngineState();
+}
+
+class _AdvancedFilterEngineState extends State<AdvancedFilterEngine> {
+  String _sortMode = 'CHRONO DESC';
+  String _scopeFilter = 'ALL';
+  String _statusFilter = 'ALL';
+  String _intensityFilter = 'ALL';
+  String _bonusFilter = 'ALL';
+  DateTime? _startDate;
+  DateTime? _endDate;
+  bool _showFilters = false;
+
+  @override
+  Widget build(BuildContext context) {
+    List<dynamic> filtered = widget.items.where((item) {
+      bool isGoal = item is Goal;
+      Scope sc = isGoal ? item.scope : (item as Remark).scope;
+      int ts = isGoal ? item.timestamp : (item as Remark).timestamp;
+
+      if (_startDate != null && ts < _startDate!.millisecondsSinceEpoch) return false;
+      if (_endDate != null && ts > _endDate!.millisecondsSinceEpoch + 86400000) return false;
+
+      if (_scopeFilter != 'ALL') {
+        if (_scopeFilter == 'SESSION' && sc != Scope.session) return false;
+        if (_scopeFilter == 'DAY' && sc != Scope.day) return false;
+        if (_scopeFilter == 'WEEK' && sc != Scope.week) return false;
+      }
+
+      if (_intensityFilter != 'ALL' && sc == Scope.session) {
+        String refId = isGoal ? item.referenceId : (item as Remark).referenceId;
+        try {
+          SessionType t = widget.state.sessions.firstWhere((s) => s.id == refId).type;
+          if (_intensityFilter == 'NORMAL' && t != SessionType.normal) return false;
+          if (_intensityFilter == 'IMPORTANT' && t != SessionType.important) return false;
+          if (_intensityFilter == 'INTENSE' && t != SessionType.intense) return false;
+        } catch (_) { return false; }
+      }
+
+      if (isGoal) {
+        if (_statusFilter != 'ALL') {
+          if (_statusFilter == 'COMPLETED' && item.status != GoalStatus.completed) return false;
+          if (_statusFilter == 'PENDING' && item.status != GoalStatus.pending) return false;
+          if (_statusFilter == 'FAILED' && item.status != GoalStatus.failed) return false;
+        }
+        if (_bonusFilter != 'ALL') {
+          if (_bonusFilter == 'BONUS ONLY' && !item.isBonus) return false;
+          if (_bonusFilter == 'NON-BONUS' && item.isBonus) return false;
+        }
+      }
+      return true;
+    }).toList();
+
+    filtered.sort((a, b) {
+      bool aGoal = a is Goal; bool bGoal = b is Goal;
+      int aTs = aGoal ? a.timestamp : (a as Remark).timestamp;
+      int bTs = bGoal ? b.timestamp : (b as Remark).timestamp;
+
+      if (_sortMode == 'UNFINISHED FIRST') {
+        if (aGoal && bGoal) {
+          int aVal = (a.status == GoalStatus.pending) ? 0 : 1;
+          int bVal = (b.status == GoalStatus.pending) ? 0 : 1;
+          if (aVal != bVal) return aVal.compareTo(bVal);
+          return bTs.compareTo(aTs);
+        } else if (aGoal) return -1;
+        else if (bGoal) return 1;
+        return bTs.compareTo(aTs);
+      }
+      if (_sortMode == 'CHRONO DESC') return bTs.compareTo(aTs);
+      if (_sortMode == 'CHRONO ASC') return aTs.compareTo(bTs);
+      return 0;
+    });
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children:[
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16), color: inkBlack,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children:[
+              Text('${widget.title} (${filtered.length})', style: const TextStyle(color: paperBg, fontWeight: FontWeight.bold)),
+              IconButton(icon: Icon(_showFilters ? Icons.expand_less : Icons.filter_list, color: paperBg), onPressed: () => setState(() => _showFilters = !_showFilters)),
+            ],
+          ),
+        ),
+        if (_showFilters) Container(
+          padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2), color: brassAccent.withOpacity(0.1)),
+          child: Column(
+            children:[
+              Row(children:[
+                Expanded(child: DropdownButtonFormField<String>(value: _sortMode, decoration: const InputDecoration(labelText: 'SORT BY', isDense: true), items: const[DropdownMenuItem(value: 'CHRONO DESC', child: Text('NEWEST')), DropdownMenuItem(value: 'CHRONO ASC', child: Text('OLDEST')), DropdownMenuItem(value: 'UNFINISHED FIRST', child: Text('UNFINISHED 1ST'))], onChanged: (v) => setState(() => _sortMode = v!))),
+                const SizedBox(width: 8),
+                Expanded(child: DropdownButtonFormField<String>(value: _scopeFilter, decoration: const InputDecoration(labelText: 'SCOPE', isDense: true), items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'SESSION', child: Text('SESSION')), DropdownMenuItem(value: 'DAY', child: Text('DAY')), DropdownMenuItem(value: 'WEEK', child: Text('WEEK'))], onChanged: (v) => setState(() => _scopeFilter = v!))),
+              ]),
+              const SizedBox(height: 8),
+              Row(children:[
+                Expanded(child: DropdownButtonFormField<String>(value: _intensityFilter, decoration: const InputDecoration(labelText: 'INTENSITY', isDense: true), items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'NORMAL', child: Text('NORMAL')), DropdownMenuItem(value: 'IMPORTANT', child: Text('IMPORTANT')), DropdownMenuItem(value: 'INTENSE', child: Text('INTENSE'))], onChanged: (v) => setState(() => _intensityFilter = v!))),
+                const SizedBox(width: 8),
+                Expanded(child: DropdownButtonFormField<String>(value: _statusFilter, decoration: const InputDecoration(labelText: 'GOAL STATUS', isDense: true), items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'COMPLETED', child: Text('COMPLETED')), DropdownMenuItem(value: 'PENDING', child: Text('PENDING')), DropdownMenuItem(value: 'FAILED', child: Text('FAILED'))], onChanged: (v) => setState(() => _statusFilter = v!))),
+              ]),
+              const SizedBox(height: 8),
+              Row(children:[
+                Expanded(child: OutlinedButton(child: Text(_startDate == null ? 'START DATE' : DateFormat('MM/dd/yyyy').format(_startDate!)), onPressed: () async { final d = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2035)); if (d != null) setState(() => _startDate = d); })),
+                const SizedBox(width: 8),
+                Expanded(child: OutlinedButton(child: Text(_endDate == null ? 'END DATE' : DateFormat('MM/dd/yyyy').format(_endDate!)), onPressed: () async { final d = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2035)); if (d != null) setState(() => _endDate = d); })),
+                IconButton(icon: const Icon(Icons.clear), onPressed: () => setState((){ _startDate = null; _endDate = null; }))
+              ])
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: filtered.length,
+            itemBuilder: (ctx, i) {
+              if (filtered[i] is Goal) {
+                Goal g = filtered[i];
+                return VisualTileBuilder(goal: g, state: widget.state,
+                  onGoalStatusCycle: () {
+                    g.status = g.status == GoalStatus.pending ? GoalStatus.completed : (g.status == GoalStatus.completed ? GoalStatus.failed : GoalStatus.pending);
+                    widget.state.notifyListeners(); widget.state.saveUserData();
+                  });
+              }
+              return VisualTileBuilder(remark: filtered[i], state: widget.state);
+            },
+          ),
+        )
+      ],
+    );
   }
 }
 
@@ -1161,6 +1294,7 @@ class SessionDetailScreen extends StatelessWidget {
                   ),
                   Text(s.description),
                   const Divider(height: 32),
+                  if (s.isBonusMode) Container(margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.all(8), color: brassAccent, child: const Text('OPERATION IN BONUS MODE', style: TextStyle(color: paperBg, fontWeight: FontWeight.bold))),
                   Text('STATUS: ${s.status.name.toUpperCase()}', style: TextStyle(fontWeight: FontWeight.bold, color: s.status == SessionStatus.completed ? steamGreen : (s.status == SessionStatus.active ? brassAccent : inkBlack))),
                   Text('SCHEDULED (BASE): ${DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.baseStartTime))}'),
                   Text('SCHEDULED (DYN): ${DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.scheduledStartTime))}'),
@@ -1170,14 +1304,14 @@ class SessionDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            if (canCompleteEarly)
-              FilledButton(
-                  style: FilledButton.styleFrom(backgroundColor: steamGreen),
-                  onPressed: () {
-                    state.completeSessionEarly(s.id);
-                    Navigator.pop(context);
-                  },
-                  child: const Text('ALL GOALS MET: COMPLETE SESSION')),
+            if (canCompleteEarly && !s.isBonusMode)
+              Row(
+                children:[
+                  Expanded(child: FilledButton(style: FilledButton.styleFrom(backgroundColor: steamGreen), onPressed: () { state.completeSessionEarly(s.id); Navigator.pop(context); }, child: const Text('COMPLETE SESS'))),
+                  const SizedBox(width: 8),
+                  Expanded(child: FilledButton(style: FilledButton.styleFrom(backgroundColor: brassAccent), onPressed: () { state.setSessionBonusMode(s.id); }, child: const Text('BONUS MODE'))),
+                ],
+              ),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1203,13 +1337,12 @@ class SessionDetailScreen extends StatelessWidget {
               ],
             ),
             ...s.goals.map((g) => VisualTileBuilder(goal: g, state: state, 
-              onSecondaryTap: () {
+              onGoalStatusCycle: () {
                 GoalStatus next = GoalStatus.pending;
                 if (g.status == GoalStatus.pending) next = GoalStatus.completed;
                 else if (g.status == GoalStatus.completed) next = GoalStatus.failed;
                 state.markGoal(s.id, g.id, next);
               },
-              onTap: () { if (!g.isLocked) state.lockGoal(s.id, g.id); }
             )),
             const SizedBox(height: 24),
             Row(
@@ -1320,11 +1453,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
           const Divider(),
           const Text('OVERALL GOALS', style: TextStyle(fontWeight: FontWeight.bold)),
           ...plan.overallGoals.map((g) => VisualTileBuilder(goal: g, state: state,
-            onSecondaryTap: () {
+            onGoalStatusCycle: () {
               g.status = g.status == GoalStatus.pending ? GoalStatus.completed : (g.status == GoalStatus.completed ? GoalStatus.failed : GoalStatus.pending);
               scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan);
-            },
-            onTap: () { g.isLocked = true; scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan); }
+            }
           )),
           FilledButton.icon(
               icon: const Icon(Icons.add),
@@ -1489,60 +1621,122 @@ class GlobalStatsScreen extends StatelessWidget {
 }
 
 // ==========================================
-// LIST BUILDER W/ SORTING FOR TABS
+// LIST BUILDER W/ ADVANCED SORTING FOR TABS
 // ==========================================
 class AdvancedSortListBuilder extends StatefulWidget {
   final PlannerState state;
   final List<dynamic> items; 
-  const AdvancedSortListBuilder({super.key, required this.state, required this.items});
+  final String title;
+  const AdvancedSortListBuilder({super.key, required this.state, required this.items, this.title = 'RECORDS'});
   @override
   State<AdvancedSortListBuilder> createState() => _AdvancedSortListBuilderState();
 }
 
 class _AdvancedSortListBuilderState extends State<AdvancedSortListBuilder> {
   String _sortMode = 'CHRONO DESC';
-  String _statusFilter = 'ALL';
   String _scopeFilter = 'ALL';
+  String _statusFilter = 'ALL';
+  String _intensityFilter = 'ALL';
+  String _bonusFilter = 'ALL';
+  DateTime? _startDate;
+  DateTime? _endDate;
+  bool _showFilters = false;
 
   @override
   Widget build(BuildContext context) {
     List<dynamic> filtered = widget.items.where((item) {
+      bool isGoal = item is Goal;
+      Scope sc = isGoal ? item.scope : (item as Remark).scope;
+      int ts = isGoal ? item.timestamp : (item as Remark).timestamp;
+
+      if (_startDate != null && ts < _startDate!.millisecondsSinceEpoch) return false;
+      if (_endDate != null && ts > _endDate!.millisecondsSinceEpoch + 86400000) return false;
+
       if (_scopeFilter != 'ALL') {
-        Scope sc = item.scope;
         if (_scopeFilter == 'SESSION' && sc != Scope.session) return false;
         if (_scopeFilter == 'DAY' && sc != Scope.day) return false;
         if (_scopeFilter == 'WEEK' && sc != Scope.week) return false;
       }
-      if (item is Goal && _statusFilter != 'ALL') {
-        if (_statusFilter == 'COMPLETED' && item.status != GoalStatus.completed) return false;
-        if (_statusFilter == 'PENDING' && item.status != GoalStatus.pending) return false;
-        if (_statusFilter == 'FAILED' && item.status != GoalStatus.failed) return false;
+
+      if (_intensityFilter != 'ALL' && sc == Scope.session) {
+        String refId = isGoal ? item.referenceId : (item as Remark).referenceId;
+        try {
+          SessionType t = widget.state.sessions.firstWhere((s) => s.id == refId).type;
+          if (_intensityFilter == 'NORMAL' && t != SessionType.normal) return false;
+          if (_intensityFilter == 'IMPORTANT' && t != SessionType.important) return false;
+          if (_intensityFilter == 'INTENSE' && t != SessionType.intense) return false;
+        } catch (_) { return false; }
+      }
+
+      if (isGoal) {
+        if (_statusFilter != 'ALL') {
+          if (_statusFilter == 'COMPLETED' && item.status != GoalStatus.completed) return false;
+          if (_statusFilter == 'PENDING' && item.status != GoalStatus.pending) return false;
+          if (_statusFilter == 'FAILED' && item.status != GoalStatus.failed) return false;
+        }
+        if (_bonusFilter != 'ALL') {
+          if (_bonusFilter == 'BONUS ONLY' && !item.isBonus) return false;
+          if (_bonusFilter == 'NON-BONUS' && item.isBonus) return false;
+        }
       }
       return true;
     }).toList();
 
     filtered.sort((a, b) {
-      if (_sortMode == 'CHRONO DESC') return b.timestamp.compareTo(a.timestamp);
-      if (_sortMode == 'CHRONO ASC') return a.timestamp.compareTo(b.timestamp);
-      if (_sortMode == 'SCOPE') return a.scope.index.compareTo(b.scope.index);
-      if (_sortMode == 'STATUS') {
-        if (a is Goal && b is Goal) return a.status.index.compareTo(b.status.index);
-        return 0;
+      bool aGoal = a is Goal; bool bGoal = b is Goal;
+      int aTs = aGoal ? a.timestamp : (a as Remark).timestamp;
+      int bTs = bGoal ? b.timestamp : (b as Remark).timestamp;
+
+      if (_sortMode == 'UNFINISHED FIRST') {
+        if (aGoal && bGoal) {
+          int aVal = (a.status == GoalStatus.pending) ? 0 : 1;
+          int bVal = (b.status == GoalStatus.pending) ? 0 : 1;
+          if (aVal != bVal) return aVal.compareTo(bVal);
+          return bTs.compareTo(aTs);
+        } else if (aGoal) return -1;
+        else if (bGoal) return 1;
+        return bTs.compareTo(aTs);
       }
+      if (_sortMode == 'CHRONO DESC') return bTs.compareTo(aTs);
+      if (_sortMode == 'CHRONO ASC') return aTs.compareTo(bTs);
       return 0;
     });
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children:[
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), color: brassAccent.withOpacity(0.1),
+          padding: const EdgeInsets.symmetric(horizontal: 16), color: inkBlack,
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children:[
-              Expanded(child: DropdownButtonFormField<String>(value: _sortMode, decoration: const InputDecoration(labelText: 'SORT'), isDense: true, items: const[DropdownMenuItem(value: 'CHRONO DESC', child: Text('NEWEST')), DropdownMenuItem(value: 'CHRONO ASC', child: Text('OLDEST')), DropdownMenuItem(value: 'SCOPE', child: Text('SCOPE')), DropdownMenuItem(value: 'STATUS', child: Text('STATUS (GOALS)'))], onChanged: (v) => setState(() => _sortMode = v!))),
-              const SizedBox(width: 8),
-              Expanded(child: DropdownButtonFormField<String>(value: _scopeFilter, decoration: const InputDecoration(labelText: 'SCOPE'), isDense: true, items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'SESSION', child: Text('SESSION')), DropdownMenuItem(value: 'DAY', child: Text('DAY')), DropdownMenuItem(value: 'WEEK', child: Text('WEEK'))], onChanged: (v) => setState(() => _scopeFilter = v!))),
-              const SizedBox(width: 8),
-              Expanded(child: DropdownButtonFormField<String>(value: _statusFilter, decoration: const InputDecoration(labelText: 'STATUS'), isDense: true, items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'COMPLETED', child: Text('COMPLETED')), DropdownMenuItem(value: 'PENDING', child: Text('PENDING')), DropdownMenuItem(value: 'FAILED', child: Text('FAILED'))], onChanged: (v) => setState(() => _statusFilter = v!))),
+              Text('${widget.title} (${filtered.length})', style: const TextStyle(color: paperBg, fontWeight: FontWeight.bold)),
+              IconButton(icon: Icon(_showFilters ? Icons.expand_less : Icons.filter_list, color: paperBg), onPressed: () => setState(() => _showFilters = !_showFilters)),
+            ],
+          ),
+        ),
+        if (_showFilters) Container(
+          padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2), color: brassAccent.withOpacity(0.1)),
+          child: Column(
+            children:[
+              Row(children:[
+                Expanded(child: DropdownButtonFormField<String>(value: _sortMode, decoration: const InputDecoration(labelText: 'SORT BY', isDense: true), items: const[DropdownMenuItem(value: 'CHRONO DESC', child: Text('NEWEST')), DropdownMenuItem(value: 'CHRONO ASC', child: Text('OLDEST')), DropdownMenuItem(value: 'UNFINISHED FIRST', child: Text('UNFINISHED 1ST'))], onChanged: (v) => setState(() => _sortMode = v!))),
+                const SizedBox(width: 8),
+                Expanded(child: DropdownButtonFormField<String>(value: _scopeFilter, decoration: const InputDecoration(labelText: 'SCOPE', isDense: true), items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'SESSION', child: Text('SESSION')), DropdownMenuItem(value: 'DAY', child: Text('DAY')), DropdownMenuItem(value: 'WEEK', child: Text('WEEK'))], onChanged: (v) => setState(() => _scopeFilter = v!))),
+              ]),
+              const SizedBox(height: 8),
+              Row(children:[
+                Expanded(child: DropdownButtonFormField<String>(value: _intensityFilter, decoration: const InputDecoration(labelText: 'INTENSITY', isDense: true), items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'NORMAL', child: Text('NORMAL')), DropdownMenuItem(value: 'IMPORTANT', child: Text('IMPORTANT')), DropdownMenuItem(value: 'INTENSE', child: Text('INTENSE'))], onChanged: (v) => setState(() => _intensityFilter = v!))),
+                const SizedBox(width: 8),
+                Expanded(child: DropdownButtonFormField<String>(value: _statusFilter, decoration: const InputDecoration(labelText: 'GOAL STATUS', isDense: true), items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'COMPLETED', child: Text('COMPLETED')), DropdownMenuItem(value: 'PENDING', child: Text('PENDING')), DropdownMenuItem(value: 'FAILED', child: Text('FAILED'))], onChanged: (v) => setState(() => _statusFilter = v!))),
+              ]),
+              const SizedBox(height: 8),
+              Row(children:[
+                Expanded(child: DropdownButtonFormField<String>(value: _bonusFilter, decoration: const InputDecoration(labelText: 'BONUS TAG', isDense: true), items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'BONUS ONLY', child: Text('BONUS ONLY')), DropdownMenuItem(value: 'NON-BONUS', child: Text('NON-BONUS'))], onChanged: (v) => setState(() => _bonusFilter = v!))),
+                const SizedBox(width: 8),
+                Expanded(child: OutlinedButton(child: Text(_startDate == null ? 'START DATE' : DateFormat('MM/dd/yyyy').format(_startDate!)), onPressed: () async { final d = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2035)); if (d != null) setState(() => _startDate = d); })),
+                IconButton(icon: const Icon(Icons.clear), onPressed: () => setState((){ _startDate = null; _endDate = null; }))
+              ])
             ],
           ),
         ),
@@ -1554,12 +1748,10 @@ class _AdvancedSortListBuilderState extends State<AdvancedSortListBuilder> {
               if (filtered[i] is Goal) {
                 Goal g = filtered[i];
                 return VisualTileBuilder(goal: g, state: widget.state,
-                  onSecondaryTap: () {
+                  onGoalStatusCycle: () {
                     g.status = g.status == GoalStatus.pending ? GoalStatus.completed : (g.status == GoalStatus.completed ? GoalStatus.failed : GoalStatus.pending);
                     widget.state.notifyListeners(); widget.state.saveUserData();
-                  },
-                  onTap: () { g.isLocked = true; widget.state.notifyListeners(); widget.state.saveUserData(); }
-                );
+                  });
               }
               return VisualTileBuilder(remark: filtered[i], state: widget.state);
             },
@@ -1605,14 +1797,11 @@ class SubjectSpecificScreen extends StatelessWidget {
         appBar: AppBar(
           title: Text(subject.toUpperCase()),
           bottom: const TabBar(
-              indicatorColor: inkBlack,
-              labelColor: inkBlack,
-              isScrollable: true,
+              indicatorColor: inkBlack, labelColor: inkBlack, isScrollable: true,
               tabs:[Tab(text: 'OVERVIEW'), Tab(text: 'SESSIONS'), Tab(text: 'GOALS'), Tab(text: 'REMARKS')]),
         ),
         body: TabBarView(
           children:[
-            // OVERVIEW TAB
             SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -1644,12 +1833,9 @@ class SubjectSpecificScreen extends StatelessWidget {
                 ],
               )
             ),
-            // SESSIONS TAB
             ListView(padding: const EdgeInsets.all(16), children: sessions.map((s) => ListTile(title: Text(s.name), subtitle: Text('${s.chapter} | ${s.status.name.toUpperCase()}'), trailing: OutlinedButton(child: const Text('OPEN'), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SessionDetailScreen(session: s)))))).toList()),
-            // GOALS TAB
-            AdvancedSortListBuilder(state: state, items: allGoals),
-            // REMARKS TAB
-            AdvancedSortListBuilder(state: state, items: allRemarks),
+            AdvancedSortListBuilder(state: state, items: allGoals, title: 'SUBJECT GOALS'),
+            AdvancedSortListBuilder(state: state, items: allRemarks, title: 'SUBJECT REMARKS'),
           ],
         ),
       ),
@@ -1680,8 +1866,8 @@ class ChapterSpecificScreen extends StatelessWidget {
         body: TabBarView(
           children:[
             ListView(padding: const EdgeInsets.all(16), children: sessions.map((s) => ListTile(title: Text(s.name), subtitle: Text(s.status.name.toUpperCase()), trailing: OutlinedButton(child: const Text('OPEN'), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SessionDetailScreen(session: s)))))).toList()),
-            AdvancedSortListBuilder(state: state, items: allGoals),
-            AdvancedSortListBuilder(state: state, items: allRemarks),
+            AdvancedSortListBuilder(state: state, items: allGoals, title: 'CHAPTER GOALS'),
+            AdvancedSortListBuilder(state: state, items: allRemarks, title: 'CHAPTER REMARKS'),
           ],
         ),
       ),
@@ -1699,80 +1885,21 @@ class GlobalDirectoryScreen extends StatefulWidget {
 }
 
 class _GlobalDirectoryScreenState extends State<GlobalDirectoryScreen> {
-  String _sortMode = 'CHRONO DESC';
-  String _typeFilter = 'ALL';
-  String _scopeFilter = 'ALL';
-
   @override
   Widget build(BuildContext context) {
     final state = context.watch<PlannerState>();
     
     List<dynamic> items =[];
-    if (_typeFilter == 'ALL' || _typeFilter == 'GOALS') {
-      items.addAll(state.sessions.where((s)=>s.status!=SessionStatus.terminated).expand((s) => s.goals));
-      items.addAll(state.days.values.expand((d) => d.overallGoals));
-      items.addAll(state.weeks.values.expand((w) => w.overallGoals));
-    }
-    if (_typeFilter == 'ALL' || _typeFilter == 'REMARKS') {
-      items.addAll(state.sessions.where((s)=>s.status!=SessionStatus.terminated).expand((s) => s.remarks));
-      items.addAll(state.days.values.expand((d) => d.overallRemarks));
-      items.addAll(state.weeks.values.expand((w) => w.overallRemarks));
-    }
-
-    List<dynamic> filtered = items.where((item) {
-      if (_scopeFilter != 'ALL') {
-        Scope sc = item.scope;
-        if (_scopeFilter == 'SESSION' && sc != Scope.session) return false;
-        if (_scopeFilter == 'DAY' && sc != Scope.day) return false;
-        if (_scopeFilter == 'WEEK' && sc != Scope.week) return false;
-      }
-      return true;
-    }).toList();
-
-    filtered.sort((a,b) {
-      if (_sortMode == 'CHRONO DESC') return b.timestamp.compareTo(a.timestamp);
-      if (_sortMode == 'CHRONO ASC') return a.timestamp.compareTo(b.timestamp);
-      if (_sortMode == 'SCOPE') return a.scope.index.compareTo(b.scope.index);
-      return 0;
-    });
+    items.addAll(state.sessions.where((s)=>s.status!=SessionStatus.terminated).expand((s) => s.goals));
+    items.addAll(state.days.values.expand((d) => d.overallGoals));
+    items.addAll(state.weeks.values.expand((w) => w.overallGoals));
+    items.addAll(state.sessions.where((s)=>s.status!=SessionStatus.terminated).expand((s) => s.remarks));
+    items.addAll(state.days.values.expand((d) => d.overallRemarks));
+    items.addAll(state.weeks.values.expand((w) => w.overallRemarks));
 
     return Scaffold(
       appBar: AppBar(title: const Text('GLOBAL DIRECTORY')),
-      body: Column(
-        children:[
-          Container(
-            padding: const EdgeInsets.all(16), decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: inkBlack, width: 2))),
-            child: Row(
-              children:[
-                Expanded(child: DropdownButtonFormField<String>(value: _sortMode, decoration: const InputDecoration(labelText: 'SORT'), isDense: true, items: const[DropdownMenuItem(value: 'CHRONO DESC', child: Text('NEWEST')), DropdownMenuItem(value: 'CHRONO ASC', child: Text('OLDEST')), DropdownMenuItem(value: 'SCOPE', child: Text('SCOPE'))], onChanged: (v) => setState(() => _sortMode = v!))),
-                const SizedBox(width: 8),
-                Expanded(child: DropdownButtonFormField<String>(value: _scopeFilter, decoration: const InputDecoration(labelText: 'SCOPE'), isDense: true, items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'SESSION', child: Text('SESSION')), DropdownMenuItem(value: 'DAY', child: Text('DAY')), DropdownMenuItem(value: 'WEEK', child: Text('WEEK'))], onChanged: (v) => setState(() => _scopeFilter = v!))),
-                const SizedBox(width: 8),
-                Expanded(child: DropdownButtonFormField<String>(value: _typeFilter, decoration: const InputDecoration(labelText: 'TYPE'), isDense: true, items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'GOALS', child: Text('GOALS')), DropdownMenuItem(value: 'REMARKS', child: Text('REMARKS'))], onChanged: (v) => setState(() => _typeFilter = v!))),
-              ],
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: filtered.length,
-              itemBuilder: (ctx, i) {
-                if (filtered[i] is Goal) {
-                  Goal g = filtered[i];
-                  return VisualTileBuilder(goal: g, state: state,
-                    onSecondaryTap: () {
-                      g.status = g.status == GoalStatus.pending ? GoalStatus.completed : (g.status == GoalStatus.completed ? GoalStatus.failed : GoalStatus.pending);
-                      state.notifyListeners(); state.saveUserData();
-                    },
-                    onTap: () { g.isLocked = true; state.notifyListeners(); state.saveUserData(); }
-                  );
-                }
-                return VisualTileBuilder(remark: filtered[i], state: state);
-              },
-            ),
-          )
-        ],
-      ),
+      body: AdvancedSortListBuilder(state: state, items: items, title: 'ALL GLOBAL RECORDS'),
     );
   }
 }
@@ -1801,6 +1928,17 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
 
   String _generateMatrixText(PlannerState state) {
     StringBuffer sb = StringBuffer();
+    sb.writeln("=== AI PARSING LEGEND & GLOSSARY ===");
+    sb.writeln("[ ] : Pending/Unfinished Goal");
+    sb.writeln("[X] : Completed Goal");
+    sb.writeln("[!] : Failed Goal");
+    sb.writeln("[BONUS] : Goal added during Bonus Time");
+    sb.writeln("[NORMAL] / [IMPORTANT] / [INTENSE] : Session Intensity Type");
+    sb.writeln("[DAY] / [WEEK] /[SESSION] : The scope/level the item belongs to");
+    sb.writeln("SRC: The name of the parent session, day, or week.");
+    sb.writeln("Ext: Extended paused time in format Days Hours Mins Secs.");
+    sb.writeln("====================================\n");
+
     sb.writeln("=== DATA MATRIX EXPORT (${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())}) ===");
 
     List<StudySession> validSessions = state.sessions.where((s) => s.status != SessionStatus.terminated).toList();
@@ -1828,8 +1966,7 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
       for (var g in allGoals) {
         if (!((g.status == GoalStatus.pending && _incPending) || (g.status == GoalStatus.completed && _incCompleted) || (g.status == GoalStatus.failed && _incFailed))) continue;
         String marker = g.status == GoalStatus.pending ? '[ ]' : (g.status == GoalStatus.completed ? '[X]' : '[!]');
-        String sourceName = '';
-        String tagType = '';
+        String sourceName = ''; String tagType = '';
         if (g.scope == Scope.session) {
           try { final s = state.sessions.firstWhere((s) => s.id == g.referenceId); sourceName = s.name; tagType = s.type.name.toUpperCase(); } catch (_) {}
         } else if (g.scope == Scope.day) {
@@ -1837,7 +1974,7 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
         } else {
           try { final w = state.weeks[g.referenceId]; sourceName = w?.customName ?? 'WEEK'; } catch (_) {} tagType = 'WEEK';
         }
-        sb.writeln("$marker ${g.text} | [$tagType] SRC: $sourceName | Scope: ${g.scope.name.toUpperCase()} | Sub: ${g.subjectContext.isNotEmpty ? g.subjectContext : 'GLOBAL'}");
+        sb.writeln("$marker ${g.text} ${g.isBonus ? '[BONUS]' : ''} |[$tagType] SRC: $sourceName | Scope: ${g.scope.name.toUpperCase()} | Sub: ${g.subjectContext.isNotEmpty ? g.subjectContext : 'GLOBAL'}");
       }
     }
 
@@ -1850,8 +1987,7 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
         if (_scopeFilter == null || _scopeFilter == Scope.week) allRemarks.addAll(state._weeks.values.expand((w) => w.overallRemarks));
       }
       for (var r in allRemarks) {
-        String sourceName = '';
-        String tagType = '';
+        String sourceName = ''; String tagType = '';
         if (r.scope == Scope.session) {
           try { final s = state.sessions.firstWhere((s) => s.id == r.referenceId); sourceName = s.name; tagType = s.type.name.toUpperCase(); } catch (_) {}
         } else if (r.scope == Scope.day) {
@@ -1879,8 +2015,7 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
           const Text('DATA EXTRACTION MATRIX', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
           const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)),
+            padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)),
             child: Column(
               children:[
                 DropdownButtonFormField<String>(value: _subFilter, decoration: const InputDecoration(labelText: 'SUBJECT FILTER'), items:[const DropdownMenuItem<String>(value: null, child: Text('ALL')), ...state.availableSubjects.map((s) => DropdownMenuItem(value: s, child: Text(s)))], onChanged: (v) => setState(() => _subFilter = v)),
@@ -1909,21 +2044,13 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
           ),
           const SizedBox(height: 24),
           FilledButton.icon(
-              icon: const Icon(Icons.copy),
-              label: const Text('COPY MATRIX TO CLIPBOARD'),
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: generatedText));
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('COPIED!')));
-              }),
+              icon: const Icon(Icons.copy), label: const Text('COPY MATRIX TO CLIPBOARD'),
+              onPressed: () { Clipboard.setData(ClipboardData(text: generatedText)); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('COPIED!'))); }),
           const SizedBox(height: 24),
           const Text('PREVIEW:', style: TextStyle(fontWeight: FontWeight.bold)),
           Container(
-            height: 300,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(border: Border.all(color: Colors.black26), color: Colors.white),
-            child: SingleChildScrollView(
-              child: Text(generatedText, style: const TextStyle(fontSize: 10, fontFamily: 'Courier')),
-            ),
+            height: 300, padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: Colors.black26), color: Colors.white),
+            child: SingleChildScrollView(child: Text(generatedText, style: const TextStyle(fontSize: 10, fontFamily: 'Courier'))),
           )
         ],
       ),
@@ -1963,39 +2090,30 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 24),
           const Text('ACCOUNTS', style: TextStyle(fontWeight: FontWeight.bold)),
           ...state.users.map((u) => ListTile(title: Text(u.name), trailing: u.id == user?.id ? const Icon(Icons.check_circle) : OutlinedButton(child: const Text('SWITCH'), onPressed: () => state.switchUser(u.id)))),
-          FilledButton(
-              child: const Text('NEW OPERATOR'),
-              onPressed: () {
-                final c = TextEditingController();
-                showDialog(
-                    context: context,
-                    builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[
-                          FilledButton(
-                              child: const Text('CREATE'),
-                              onPressed: () {
-                                state.createUser(c.text);
-                                Navigator.pop(ctx);
-                              })
-                        ]));
-              }),
+          FilledButton(child: const Text('NEW OPERATOR'), onPressed: () {
+            final c = TextEditingController();
+            showDialog(context: context, builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[FilledButton(child: const Text('CREATE'), onPressed: () { state.createUser(c.text); Navigator.pop(ctx); })]));
+          }),
           const SizedBox(height: 24),
-          const Text('CUSTOM SUBJECTS', style: TextStyle(fontWeight: FontWeight.bold)),
-          if (user != null) ...user.customSubjects.map((s) => ListTile(title: Text(s))),
-          FilledButton(
-              child: const Text('ADD SUBJECT'),
-              onPressed: () {
-                final c = TextEditingController();
-                showDialog(
-                    context: context,
-                    builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[
-                          FilledButton(
-                              child: const Text('ADD'),
-                              onPressed: () {
-                                state.addCustomSubject(c.text);
-                                Navigator.pop(ctx);
-                              })
-                        ]));
-              }),
+          const Text('CUSTOM SUBJECTS & CHAPTERS', style: TextStyle(fontWeight: FontWeight.bold)),
+          if (user != null) ...user.customSubjects.map((s) => ExpansionTile(
+            title: Text(s, style: const TextStyle(fontWeight: FontWeight.bold)),
+            children:[
+              ...user.customChapters[s]?.map((c) => ListTile(title: Text(c, style: const TextStyle(fontSize: 12)))) ??[],
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: OutlinedButton.icon(icon: const Icon(Icons.add), label: const Text('ADD CHAPTER'), onPressed: () {
+                  final c = TextEditingController();
+                  showDialog(context: context, builder: (ctx) => AlertDialog(content: TextField(controller: c, decoration: const InputDecoration(labelText: 'CHAPTER NAME')), actions:[FilledButton(child: const Text('ADD'), onPressed: () { state.addCustomChapter(s, c.text); Navigator.pop(ctx); })]));
+                }),
+              )
+            ],
+          )),
+          const SizedBox(height: 16),
+          FilledButton(child: const Text('ADD SUBJECT'), onPressed: () {
+            final c = TextEditingController();
+            showDialog(context: context, builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[FilledButton(child: const Text('ADD'), onPressed: () { state.addCustomSubject(c.text); Navigator.pop(ctx); })]));
+          }),
         ],
       ),
     );
