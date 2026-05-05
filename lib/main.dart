@@ -90,6 +90,23 @@ final ThemeData brutalistTheme = ThemeData(
 );
 
 // ==========================================
+// UTILITY: TIME FORMATTER
+// ==========================================
+String formatDuration(int totalSeconds) {
+  if (totalSeconds == 0) return '0S';
+  int d = totalSeconds ~/ 86400;
+  int h = (totalSeconds % 86400) ~/ 3600;
+  int m = (totalSeconds % 3600) ~/ 60;
+  int s = totalSeconds % 60;
+  List<String> parts =[];
+  if (d > 0) parts.add('${d}D');
+  if (h > 0) parts.add('${h}H');
+  if (m > 0) parts.add('${m}M');
+  if (s > 0) parts.add('${s}S');
+  return parts.join(' ');
+}
+
+// ==========================================
 // PCMB DOMAIN DATA
 // ==========================================
 const Map<String, List<String>> pcmbChapters = {
@@ -159,7 +176,7 @@ class Goal {
   Scope scope;
   String referenceId;
   String subjectContext;
-  int timestamp; // Used for unified sorting in Global Directory
+  int timestamp;
 
   Goal({required this.id, required this.text, this.status = GoalStatus.pending, this.isLocked = false, required this.scope, required this.referenceId, this.subjectContext = '', required this.timestamp});
   factory Goal.fromJson(Map<String, dynamic> json) => Goal(
@@ -309,22 +326,33 @@ class VisualTileBuilder extends StatelessWidget {
     String text = isGoal ? goal!.text : remark!.text;
     int timestamp = isGoal ? goal!.timestamp : remark!.timestamp;
 
-    String sessionName = 'N/A';
-    SessionType sType = SessionType.normal;
+    String sourceName = '';
+    Color borderColor = inkBlack;
+    String tagLabel = '';
 
     if (scope == Scope.session) {
       try {
         final s = state.sessions.firstWhere((x) => x.id == refId);
-        sessionName = s.name;
-        sType = s.type;
-      } catch (_) { sessionName = '[DELETED SESSION]'; }
-    } else {
-      sessionName = scope == Scope.day ? 'DAY OVERALL' : 'WEEK OVERALL';
+        sourceName = s.name.toUpperCase();
+        if (s.type == SessionType.important) { borderColor = importantBlue; tagLabel = '[IMPORTANT SESSION]'; }
+        else if (s.type == SessionType.intense) { borderColor = intensePurple; tagLabel = '[INTENSE SESSION]'; }
+        else { borderColor = inkBlack; tagLabel = '[NORMAL SESSION]'; }
+      } catch (_) { sourceName = '[DELETED SESSION]'; tagLabel = '[SESSION]'; }
+    } else if (scope == Scope.day) {
+      try {
+        final d = state.days[refId];
+        sourceName = (d != null && d.customName.isNotEmpty) ? d.customName.toUpperCase() : 'DAY: $refId';
+      } catch (_) { sourceName = 'DAY: $refId'; }
+      borderColor = steamGreen;
+      tagLabel = '[DAY SCOPE]';
+    } else if (scope == Scope.week) {
+      try {
+        final w = state.weeks[refId];
+        sourceName = (w != null && w.customName.isNotEmpty) ? w.customName.toUpperCase() : 'WEEK: $refId';
+      } catch (_) { sourceName = 'WEEK: $refId'; }
+      borderColor = brassAccent;
+      tagLabel = '[WEEK SCOPE]';
     }
-
-    Color borderColor = inkBlack;
-    if (sType == SessionType.important) borderColor = importantBlue;
-    if (sType == SessionType.intense) borderColor = intensePurple;
 
     Widget leadingIcon;
     if (isGoal) {
@@ -351,7 +379,7 @@ class VisualTileBuilder extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children:[
                 const SizedBox(height: 4),
-                Text('SRC: $sessionName', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                Text('$tagLabel SRC: $sourceName', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: borderColor)),
                 Text(DateFormat('MM/dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(timestamp)), style: const TextStyle(fontSize: 10, color: Colors.black54)),
               ],
             ),
@@ -403,15 +431,15 @@ class PlannerState extends ChangeNotifier {
 
   Future<void> initSystem() async {
     final prefs = await SharedPreferences.getInstance();
-    final usersJson = prefs.getString('sys_users_v5');
+    final usersJson = prefs.getString('sys_users_v6');
     if (usersJson != null) {
       _users = (jsonDecode(usersJson) as List).map((u) => UserProfile.fromJson(u)).toList();
     }
     if (_users.isEmpty) {
       _users.add(UserProfile(id: 'usr_${DateTime.now().millisecondsSinceEpoch}', name: 'OPERATOR_01', customSubjects:[]));
-      await prefs.setString('sys_users_v5', jsonEncode(_users.map((u) => u.toJson()).toList()));
+      await prefs.setString('sys_users_v6', jsonEncode(_users.map((u) => u.toJson()).toList()));
     }
-    final lastUserId = prefs.getString('last_user_id_v5') ?? _users.first.id;
+    final lastUserId = prefs.getString('last_user_id_v6') ?? _users.first.id;
     _currentUser = _users.firstWhere((u) => u.id == lastUserId, orElse: () => _users.first);
     await loadUserData(_currentUser!.id);
 
@@ -484,7 +512,7 @@ class PlannerState extends ChangeNotifier {
         }
       } else {
         if (currEnd > next.scheduledStartTime && next.status == SessionStatus.scheduled) {
-          next.scheduledStartTime = currEnd + 60000; // Exact 1 min gap ONLY when overlapping
+          next.scheduledStartTime = currEnd + 60000; 
         }
       }
     }
@@ -504,17 +532,17 @@ class PlannerState extends ChangeNotifier {
 
   Future<void> loadUserData(String uid) async {
     final prefs = await SharedPreferences.getInstance();
-    final sJson = prefs.getString('sessions_v5_$uid');
+    final sJson = prefs.getString('sessions_v6_$uid');
     _sessions = sJson != null ? (jsonDecode(sJson) as List).map((s) => StudySession.fromJson(s)).toList() :[];
 
-    final dJson = prefs.getString('days_v5_$uid');
+    final dJson = prefs.getString('days_v6_$uid');
     if (dJson != null) {
       _days = (jsonDecode(dJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v)));
     } else {
       _days = {};
     }
 
-    final wJson = prefs.getString('weeks_v5_$uid');
+    final wJson = prefs.getString('weeks_v6_$uid');
     if (wJson != null) {
       _weeks = (jsonDecode(wJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v)));
     } else {
@@ -529,31 +557,42 @@ class PlannerState extends ChangeNotifier {
     if (_currentUser == null) return;
     final uid = _currentUser!.id;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sessions_v5_$uid', jsonEncode(_sessions.map((s) => s.toJson()).toList()));
-    await prefs.setString('days_v5_$uid', jsonEncode(_days.map((k, v) => MapEntry(k, v.toJson()))));
-    await prefs.setString('weeks_v5_$uid', jsonEncode(_weeks.map((k, v) => MapEntry(k, v.toJson()))));
+    await prefs.setString('sessions_v6_$uid', jsonEncode(_sessions.map((s) => s.toJson()).toList()));
+    await prefs.setString('days_v6_$uid', jsonEncode(_days.map((k, v) => MapEntry(k, v.toJson()))));
+    await prefs.setString('weeks_v6_$uid', jsonEncode(_weeks.map((k, v) => MapEntry(k, v.toJson()))));
   }
 
   Future<void> switchUser(String id) async {
     _isLoading = true; notifyListeners();
     _currentUser = _users.firstWhere((u) => u.id == id);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_user_id_v5', _currentUser!.id);
+    await prefs.setString('last_user_id_v6', _currentUser!.id);
     await loadUserData(_currentUser!.id);
   }
 
   Future<void> createUser(String name) async {
     _users.add(UserProfile(id: 'usr_${DateTime.now().millisecondsSinceEpoch}', name: name, customSubjects:[]));
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sys_users_v5', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    await prefs.setString('sys_users_v6', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
+  }
+
+  Future<void> updateUserName(String newName) async {
+    if (_currentUser != null) {
+      _currentUser!.name = newName;
+      int idx = _users.indexWhere((u) => u.id == _currentUser!.id);
+      if (idx != -1) _users[idx] = _currentUser!;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('sys_users_v6', jsonEncode(_users.map((u) => u.toJson()).toList()));
+      notifyListeners();
+    }
   }
 
   Future<void> addCustomSubject(String sub) async {
     if (_currentUser == null || _currentUser!.customSubjects.contains(sub)) return;
     _currentUser!.customSubjects.add(sub);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sys_users_v5', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    await prefs.setString('sys_users_v6', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
   }
 
@@ -645,7 +684,7 @@ class PlannerState extends ChangeNotifier {
   }
 
   PlanNode getDayPlan(String dateId) {
-    if (!_days.containsKey(dateId)) _days[dateId] = PlanNode(id: dateId, customName: '', overallGoals:[], overallRemarks: []);
+    if (!_days.containsKey(dateId)) _days[dateId] = PlanNode(id: dateId, customName: '', overallGoals:[], overallRemarks:[]);
     return _days[dateId]!;
   }
 
@@ -656,7 +695,7 @@ class PlannerState extends ChangeNotifier {
   }
 
   PlanNode getWeekPlan(String weekId) {
-    if (!_weeks.containsKey(weekId)) _weeks[weekId] = PlanNode(id: weekId, customName: '', overallGoals: [], overallRemarks: []);
+    if (!_weeks.containsKey(weekId)) _weeks[weekId] = PlanNode(id: weekId, customName: '', overallGoals:[], overallRemarks: []);
     return _weeks[weekId]!;
   }
 
@@ -691,7 +730,7 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
-  final List<Widget> _screens = const [DashboardScreen(), CalendarScreen(), DataBrowserScreen(), GlobalStatsScreen(), ProfileScreen()];
+  final List<Widget> _screens = const[DashboardScreen(), CalendarScreen(), DataBrowserScreen(), GlobalStatsScreen(), ProfileScreen()];
 
   @override
   Widget build(BuildContext context) {
@@ -980,7 +1019,7 @@ class _SessionEditorScreenState extends State<SessionEditorScreen> {
     final state = context.watch<PlannerState>();
     bool isLocked = widget.existing != null && widget.existing!.status != SessionStatus.scheduled;
     if (_subject == null && state.availableSubjects.isNotEmpty) _subject = state.availableSubjects.first;
-    List<String> chapters = _subject != null ? state.getChaptersForSubject(_subject!) :['General'];
+    List<String> chapters = _subject != null ? state.getChaptersForSubject(_subject!) : ['General'];
     if (_chapter == null || !chapters.contains(_chapter)) _chapter = chapters.first;
 
     return Scaffold(
@@ -1125,7 +1164,7 @@ class SessionDetailScreen extends StatelessWidget {
                   Text('STATUS: ${s.status.name.toUpperCase()}', style: TextStyle(fontWeight: FontWeight.bold, color: s.status == SessionStatus.completed ? steamGreen : (s.status == SessionStatus.active ? brassAccent : inkBlack))),
                   Text('SCHEDULED (BASE): ${DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.baseStartTime))}'),
                   Text('SCHEDULED (DYN): ${DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.scheduledStartTime))}'),
-                  Text('PAUSED EXTENSION: ${s.pausedSeconds} SEC | PAUSE COUNT: ${s.pauseCount}'),
+                  Text('PAUSED EXTENSION: ${formatDuration(s.pausedSeconds)} | PAUSE COUNT: ${s.pauseCount}'),
                   if (s.status == SessionStatus.completed) Text('ACTUAL END: ${DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.completionTime!))}'),
                 ],
               ),
@@ -1348,7 +1387,6 @@ class GlobalStatsScreen extends StatelessWidget {
     final validSessions = state.sessions.where((s) => s.status == SessionStatus.completed).toList();
 
     int totalSecs = validSessions.fold(0, (sum, s) => sum + s.elapsedSeconds);
-    double totalHours = totalSecs / 3600;
     int totalGoals = validSessions.fold(0, (sum, s) => sum + s.goals.length);
     int compGoals = validSessions.fold(0, (sum, s) => sum + s.goals.where((g) => g.status == GoalStatus.completed).length);
     double completionRate = totalGoals > 0 ? (compGoals / totalGoals) * 100 : 0;
@@ -1360,7 +1398,7 @@ class GlobalStatsScreen extends StatelessWidget {
       subHours[s.subject] = (subHours[s.subject] ?? 0) + s.elapsedSeconds;
     }
 
-    List<BarChartGroupData> barGroups =[];
+    List<BarChartGroupData> barGroups = [];
     List<String> subLabels =[];
     int xIndex = 0;
     double maxY = 1;
@@ -1385,7 +1423,7 @@ class GlobalStatsScreen extends StatelessWidget {
           ]),
           const SizedBox(height: 16),
           Row(children:[
-            Expanded(child: _buildStatBox('TOTAL HOURS', totalHours.toStringAsFixed(1))),
+            Expanded(child: _buildStatBox('TOTAL TIME', formatDuration(totalSecs))),
             const SizedBox(width: 8),
             Expanded(child: _buildStatBox('SESSIONS', validSessions.length.toString())),
             const SizedBox(width: 8),
@@ -1395,7 +1433,7 @@ class GlobalStatsScreen extends StatelessWidget {
           Row(children:[
             Expanded(child: _buildStatBox('TOTAL PAUSES', totalPauses.toString())),
             const SizedBox(width: 8),
-            Expanded(child: _buildStatBox('TOTAL EXT', '${(totalExt/60).toStringAsFixed(0)}m')),
+            Expanded(child: _buildStatBox('TOTAL EXT', formatDuration(totalExt))),
           ]),
           const SizedBox(height: 24),
           if (barGroups.isNotEmpty)
@@ -1415,7 +1453,7 @@ class GlobalStatsScreen extends StatelessWidget {
                   topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
-                gridData: FlGridData(show: true, drawVerticalLine: false, getDrawingHorizontalLine: (v) => const FlLine(color: Colors.black26, strokeWidth: 1, dashArray: [4, 4])),
+                gridData: FlGridData(show: true, drawVerticalLine: false, getDrawingHorizontalLine: (v) => const FlLine(color: Colors.black26, strokeWidth: 1, dashArray:[4, 4])),
                 borderData: FlBorderData(show: false),
                 barGroups: barGroups,
               )),
@@ -1430,7 +1468,7 @@ class GlobalStatsScreen extends StatelessWidget {
             return Card(
               child: ListTile(
                 title: Text(sub.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text('TOTAL TIME: ${(seconds / 3600).toStringAsFixed(1)} HOURS'),
+                subtitle: Text('TOTAL TIME: ${formatDuration(seconds)}'),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SubjectSpecificScreen(subject: sub))),
               ),
@@ -1445,7 +1483,89 @@ class GlobalStatsScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2), color: brassAccent.withOpacity(0.1)),
-      child: Column(children:[Text(val, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)), Text(title, style: const TextStyle(fontSize: 10), textAlign: TextAlign.center)]),
+      child: Column(children:[Text(val, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)), Text(title, style: const TextStyle(fontSize: 10), textAlign: TextAlign.center)]),
+    );
+  }
+}
+
+// ==========================================
+// LIST BUILDER W/ SORTING FOR TABS
+// ==========================================
+class AdvancedSortListBuilder extends StatefulWidget {
+  final PlannerState state;
+  final List<dynamic> items; 
+  const AdvancedSortListBuilder({super.key, required this.state, required this.items});
+  @override
+  State<AdvancedSortListBuilder> createState() => _AdvancedSortListBuilderState();
+}
+
+class _AdvancedSortListBuilderState extends State<AdvancedSortListBuilder> {
+  String _sortMode = 'CHRONO DESC';
+  String _statusFilter = 'ALL';
+  String _scopeFilter = 'ALL';
+
+  @override
+  Widget build(BuildContext context) {
+    List<dynamic> filtered = widget.items.where((item) {
+      if (_scopeFilter != 'ALL') {
+        Scope sc = item.scope;
+        if (_scopeFilter == 'SESSION' && sc != Scope.session) return false;
+        if (_scopeFilter == 'DAY' && sc != Scope.day) return false;
+        if (_scopeFilter == 'WEEK' && sc != Scope.week) return false;
+      }
+      if (item is Goal && _statusFilter != 'ALL') {
+        if (_statusFilter == 'COMPLETED' && item.status != GoalStatus.completed) return false;
+        if (_statusFilter == 'PENDING' && item.status != GoalStatus.pending) return false;
+        if (_statusFilter == 'FAILED' && item.status != GoalStatus.failed) return false;
+      }
+      return true;
+    }).toList();
+
+    filtered.sort((a, b) {
+      if (_sortMode == 'CHRONO DESC') return b.timestamp.compareTo(a.timestamp);
+      if (_sortMode == 'CHRONO ASC') return a.timestamp.compareTo(b.timestamp);
+      if (_sortMode == 'SCOPE') return a.scope.index.compareTo(b.scope.index);
+      if (_sortMode == 'STATUS') {
+        if (a is Goal && b is Goal) return a.status.index.compareTo(b.status.index);
+        return 0;
+      }
+      return 0;
+    });
+
+    return Column(
+      children:[
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), color: brassAccent.withOpacity(0.1),
+          child: Row(
+            children:[
+              Expanded(child: DropdownButtonFormField<String>(value: _sortMode, decoration: const InputDecoration(labelText: 'SORT'), isDense: true, items: const[DropdownMenuItem(value: 'CHRONO DESC', child: Text('NEWEST')), DropdownMenuItem(value: 'CHRONO ASC', child: Text('OLDEST')), DropdownMenuItem(value: 'SCOPE', child: Text('SCOPE')), DropdownMenuItem(value: 'STATUS', child: Text('STATUS (GOALS)'))], onChanged: (v) => setState(() => _sortMode = v!))),
+              const SizedBox(width: 8),
+              Expanded(child: DropdownButtonFormField<String>(value: _scopeFilter, decoration: const InputDecoration(labelText: 'SCOPE'), isDense: true, items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'SESSION', child: Text('SESSION')), DropdownMenuItem(value: 'DAY', child: Text('DAY')), DropdownMenuItem(value: 'WEEK', child: Text('WEEK'))], onChanged: (v) => setState(() => _scopeFilter = v!))),
+              const SizedBox(width: 8),
+              Expanded(child: DropdownButtonFormField<String>(value: _statusFilter, decoration: const InputDecoration(labelText: 'STATUS'), isDense: true, items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'COMPLETED', child: Text('COMPLETED')), DropdownMenuItem(value: 'PENDING', child: Text('PENDING')), DropdownMenuItem(value: 'FAILED', child: Text('FAILED'))], onChanged: (v) => setState(() => _statusFilter = v!))),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: filtered.length,
+            itemBuilder: (ctx, i) {
+              if (filtered[i] is Goal) {
+                Goal g = filtered[i];
+                return VisualTileBuilder(goal: g, state: widget.state,
+                  onSecondaryTap: () {
+                    g.status = g.status == GoalStatus.pending ? GoalStatus.completed : (g.status == GoalStatus.completed ? GoalStatus.failed : GoalStatus.pending);
+                    widget.state.notifyListeners(); widget.state.saveUserData();
+                  },
+                  onTap: () { g.isLocked = true; widget.state.notifyListeners(); widget.state.saveUserData(); }
+                );
+              }
+              return VisualTileBuilder(remark: filtered[i], state: widget.state);
+            },
+          ),
+        )
+      ],
     );
   }
 }
@@ -1476,6 +1596,9 @@ class SubjectSpecificScreen extends StatelessWidget {
     });
     maxY = maxY * 1.2;
 
+    List<Goal> allGoals = sessions.expand((s) => s.goals).toList();
+    List<Remark> allRemarks = sessions.expand((s) => s.remarks).toList();
+
     return DefaultTabController(
       length: 4,
       child: Scaffold(
@@ -1496,11 +1619,11 @@ class SubjectSpecificScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children:[
                   Row(children:[
-                    Expanded(child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)), child: Column(children:[Text((totalSecs/3600).toStringAsFixed(1), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)), const Text('HOURS', style: TextStyle(fontSize: 10))]))),
+                    Expanded(child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)), child: Column(children:[Text(formatDuration(totalSecs), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)), const Text('TIME SPENT', style: TextStyle(fontSize: 10))]))),
                     const SizedBox(width: 8),
-                    Expanded(child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)), child: Column(children:[Text(sessions.length.toString(), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)), const Text('SESSIONS', style: TextStyle(fontSize: 10))]))),
+                    Expanded(child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)), child: Column(children:[Text(sessions.length.toString(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)), const Text('SESSIONS', style: TextStyle(fontSize: 10))]))),
                     const SizedBox(width: 8),
-                    Expanded(child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)), child: Column(children:[Text(totalGoals > 0 ? '${((compGoals/totalGoals)*100).toStringAsFixed(0)}%' : '0%', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)), const Text('GOAL COMP', style: TextStyle(fontSize: 10))]))),
+                    Expanded(child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)), child: Column(children:[Text(totalGoals > 0 ? '${((compGoals/totalGoals)*100).toStringAsFixed(0)}%' : '0%', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)), const Text('GOAL COMP', style: TextStyle(fontSize: 10))]))),
                   ]),
                   const SizedBox(height: 24),
                   if (barGroups.isNotEmpty)
@@ -1516,7 +1639,7 @@ class SubjectSpecificScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   const Text('CHAPTER DIRECTORY', style: TextStyle(fontWeight: FontWeight.bold)),
                   ...chapters.map((c) {
-                    return Card(child: ListTile(title: Text(c, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)), trailing: Text('${((chapSecs[c] ?? 0) / 3600).toStringAsFixed(1)} H'), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChapterSpecificScreen(subject: subject, chapter: c)))));
+                    return Card(child: ListTile(title: Text(c, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)), trailing: Text(formatDuration(chapSecs[c] ?? 0)), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChapterSpecificScreen(subject: subject, chapter: c)))));
                   })
                 ],
               )
@@ -1524,9 +1647,9 @@ class SubjectSpecificScreen extends StatelessWidget {
             // SESSIONS TAB
             ListView(padding: const EdgeInsets.all(16), children: sessions.map((s) => ListTile(title: Text(s.name), subtitle: Text('${s.chapter} | ${s.status.name.toUpperCase()}'), trailing: OutlinedButton(child: const Text('OPEN'), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SessionDetailScreen(session: s)))))).toList()),
             // GOALS TAB
-            ListView(padding: const EdgeInsets.all(16), children: sessions.expand((s) => s.goals.map((g) => VisualTileBuilder(goal: g, state: state))).toList()),
+            AdvancedSortListBuilder(state: state, items: allGoals),
             // REMARKS TAB
-            ListView(padding: const EdgeInsets.all(16), children: sessions.expand((s) => s.remarks.map((r) => VisualTileBuilder(remark: r, state: state))).toList()),
+            AdvancedSortListBuilder(state: state, items: allRemarks),
           ],
         ),
       ),
@@ -1544,6 +1667,9 @@ class ChapterSpecificScreen extends StatelessWidget {
     final state = context.watch<PlannerState>();
     final sessions = state.sessions.where((s) => s.subject == subject && s.chapter == chapter && s.status != SessionStatus.terminated).toList();
 
+    List<Goal> allGoals = sessions.expand((s) => s.goals).toList();
+    List<Remark> allRemarks = sessions.expand((s) => s.remarks).toList();
+
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -1554,8 +1680,8 @@ class ChapterSpecificScreen extends StatelessWidget {
         body: TabBarView(
           children:[
             ListView(padding: const EdgeInsets.all(16), children: sessions.map((s) => ListTile(title: Text(s.name), subtitle: Text(s.status.name.toUpperCase()), trailing: OutlinedButton(child: const Text('OPEN'), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SessionDetailScreen(session: s)))))).toList()),
-            ListView(padding: const EdgeInsets.all(16), children: sessions.expand((s) => s.goals.map((g) => VisualTileBuilder(goal: g, state: state))).toList()),
-            ListView(padding: const EdgeInsets.all(16), children: sessions.expand((s) => s.remarks.map((r) => VisualTileBuilder(remark: r, state: state))).toList()),
+            AdvancedSortListBuilder(state: state, items: allGoals),
+            AdvancedSortListBuilder(state: state, items: allRemarks),
           ],
         ),
       ),
@@ -1573,8 +1699,9 @@ class GlobalDirectoryScreen extends StatefulWidget {
 }
 
 class _GlobalDirectoryScreenState extends State<GlobalDirectoryScreen> {
-  String _sortMode = 'TIME DESC';
+  String _sortMode = 'CHRONO DESC';
   String _typeFilter = 'ALL';
+  String _scopeFilter = 'ALL';
 
   @override
   Widget build(BuildContext context) {
@@ -1592,30 +1719,55 @@ class _GlobalDirectoryScreenState extends State<GlobalDirectoryScreen> {
       items.addAll(state.weeks.values.expand((w) => w.overallRemarks));
     }
 
-    if (_sortMode == 'TIME DESC') items.sort((a,b) => b.timestamp.compareTo(a.timestamp));
-    if (_sortMode == 'TIME ASC') items.sort((a,b) => a.timestamp.compareTo(b.timestamp));
+    List<dynamic> filtered = items.where((item) {
+      if (_scopeFilter != 'ALL') {
+        Scope sc = item.scope;
+        if (_scopeFilter == 'SESSION' && sc != Scope.session) return false;
+        if (_scopeFilter == 'DAY' && sc != Scope.day) return false;
+        if (_scopeFilter == 'WEEK' && sc != Scope.week) return false;
+      }
+      return true;
+    }).toList();
+
+    filtered.sort((a,b) {
+      if (_sortMode == 'CHRONO DESC') return b.timestamp.compareTo(a.timestamp);
+      if (_sortMode == 'CHRONO ASC') return a.timestamp.compareTo(b.timestamp);
+      if (_sortMode == 'SCOPE') return a.scope.index.compareTo(b.scope.index);
+      return 0;
+    });
 
     return Scaffold(
       appBar: AppBar(title: const Text('GLOBAL DIRECTORY')),
       body: Column(
         children:[
           Container(
-            padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border(bottom: BorderSide(color: inkBlack, width: 2))),
+            padding: const EdgeInsets.all(16), decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: inkBlack, width: 2))),
             child: Row(
               children:[
-                Expanded(child: DropdownButtonFormField<String>(value: _sortMode, decoration: const InputDecoration(labelText: 'SORT'), items: const[DropdownMenuItem(value: 'TIME DESC', child: Text('NEWEST')), DropdownMenuItem(value: 'TIME ASC', child: Text('OLDEST'))], onChanged: (v) => setState(() => _sortMode = v!))),
-                const SizedBox(width: 16),
-                Expanded(child: DropdownButtonFormField<String>(value: _typeFilter, decoration: const InputDecoration(labelText: 'TYPE'), items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'GOALS', child: Text('GOALS')), DropdownMenuItem(value: 'REMARKS', child: Text('REMARKS'))], onChanged: (v) => setState(() => _typeFilter = v!))),
+                Expanded(child: DropdownButtonFormField<String>(value: _sortMode, decoration: const InputDecoration(labelText: 'SORT'), isDense: true, items: const[DropdownMenuItem(value: 'CHRONO DESC', child: Text('NEWEST')), DropdownMenuItem(value: 'CHRONO ASC', child: Text('OLDEST')), DropdownMenuItem(value: 'SCOPE', child: Text('SCOPE'))], onChanged: (v) => setState(() => _sortMode = v!))),
+                const SizedBox(width: 8),
+                Expanded(child: DropdownButtonFormField<String>(value: _scopeFilter, decoration: const InputDecoration(labelText: 'SCOPE'), isDense: true, items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'SESSION', child: Text('SESSION')), DropdownMenuItem(value: 'DAY', child: Text('DAY')), DropdownMenuItem(value: 'WEEK', child: Text('WEEK'))], onChanged: (v) => setState(() => _scopeFilter = v!))),
+                const SizedBox(width: 8),
+                Expanded(child: DropdownButtonFormField<String>(value: _typeFilter, decoration: const InputDecoration(labelText: 'TYPE'), isDense: true, items: const[DropdownMenuItem(value: 'ALL', child: Text('ALL')), DropdownMenuItem(value: 'GOALS', child: Text('GOALS')), DropdownMenuItem(value: 'REMARKS', child: Text('REMARKS'))], onChanged: (v) => setState(() => _typeFilter = v!))),
               ],
             ),
           ),
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: items.length,
+              itemCount: filtered.length,
               itemBuilder: (ctx, i) {
-                if (items[i] is Goal) return VisualTileBuilder(goal: items[i] as Goal, state: state);
-                return VisualTileBuilder(remark: items[i] as Remark, state: state);
+                if (filtered[i] is Goal) {
+                  Goal g = filtered[i];
+                  return VisualTileBuilder(goal: g, state: state,
+                    onSecondaryTap: () {
+                      g.status = g.status == GoalStatus.pending ? GoalStatus.completed : (g.status == GoalStatus.completed ? GoalStatus.failed : GoalStatus.pending);
+                      state.notifyListeners(); state.saveUserData();
+                    },
+                    onTap: () { g.isLocked = true; state.notifyListeners(); state.saveUserData(); }
+                  );
+                }
+                return VisualTileBuilder(remark: filtered[i], state: state);
               },
             ),
           )
@@ -1661,7 +1813,7 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
         int comp = s.goals.where((g) => g.status == GoalStatus.completed).length;
         int incomp = s.goals.where((g) => g.status != GoalStatus.completed).length;
         sb.writeln("[${s.type.name.toUpperCase()}] [${s.status.name.toUpperCase()}] ${s.name} | ${s.subject} -> ${s.chapter} (${DateFormat('MM/dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.scheduledStartTime))})");
-        sb.writeln("    > Pauses: ${s.pauseCount} | Ext: ${s.pausedSeconds}s | Goals Total: ${s.goals.length} (C: $comp, I: $incomp)");
+        sb.writeln("    > Pauses: ${s.pauseCount} | Ext: ${formatDuration(s.pausedSeconds)} | Goals Total: ${s.goals.length} (C: $comp, I: $incomp)");
       }
     }
 
@@ -1676,9 +1828,16 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
       for (var g in allGoals) {
         if (!((g.status == GoalStatus.pending && _incPending) || (g.status == GoalStatus.completed && _incCompleted) || (g.status == GoalStatus.failed && _incFailed))) continue;
         String marker = g.status == GoalStatus.pending ? '[ ]' : (g.status == GoalStatus.completed ? '[X]' : '[!]');
-        String sessionName = 'N/A';
-        try { if (g.scope == Scope.session) sessionName = state.sessions.firstWhere((s) => s.id == g.referenceId).name; } catch (_) {}
-        sb.writeln("$marker ${g.text} | Session: $sessionName | Scope: ${g.scope.name.toUpperCase()} | Sub: ${g.subjectContext.isNotEmpty ? g.subjectContext : 'GLOBAL'}");
+        String sourceName = '';
+        String tagType = '';
+        if (g.scope == Scope.session) {
+          try { final s = state.sessions.firstWhere((s) => s.id == g.referenceId); sourceName = s.name; tagType = s.type.name.toUpperCase(); } catch (_) {}
+        } else if (g.scope == Scope.day) {
+          try { final d = state.days[g.referenceId]; sourceName = d?.customName ?? 'DAY'; } catch (_) {} tagType = 'DAY';
+        } else {
+          try { final w = state.weeks[g.referenceId]; sourceName = w?.customName ?? 'WEEK'; } catch (_) {} tagType = 'WEEK';
+        }
+        sb.writeln("$marker ${g.text} | [$tagType] SRC: $sourceName | Scope: ${g.scope.name.toUpperCase()} | Sub: ${g.subjectContext.isNotEmpty ? g.subjectContext : 'GLOBAL'}");
       }
     }
 
@@ -1691,9 +1850,16 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
         if (_scopeFilter == null || _scopeFilter == Scope.week) allRemarks.addAll(state._weeks.values.expand((w) => w.overallRemarks));
       }
       for (var r in allRemarks) {
-        String sessionName = 'N/A';
-        try { if (r.scope == Scope.session) sessionName = state.sessions.firstWhere((s) => s.id == r.referenceId).name; } catch (_) {}
-        sb.writeln("* ${r.text} | Session: $sessionName | Scope: ${r.scope.name.toUpperCase()} | Sub: ${r.subjectContext.isNotEmpty ? r.subjectContext : 'GLOBAL'}");
+        String sourceName = '';
+        String tagType = '';
+        if (r.scope == Scope.session) {
+          try { final s = state.sessions.firstWhere((s) => s.id == r.referenceId); sourceName = s.name; tagType = s.type.name.toUpperCase(); } catch (_) {}
+        } else if (r.scope == Scope.day) {
+          try { final d = state.days[r.referenceId]; sourceName = d?.customName ?? 'DAY'; } catch (_) {} tagType = 'DAY';
+        } else {
+          try { final w = state.weeks[r.referenceId]; sourceName = w?.customName ?? 'WEEK'; } catch (_) {} tagType = 'WEEK';
+        }
+        sb.writeln("* ${r.text} | [$tagType] SRC: $sourceName | Scope: ${r.scope.name.toUpperCase()} | Sub: ${r.subjectContext.isNotEmpty ? r.subjectContext : 'GLOBAL'}");
       }
     }
 
@@ -1783,7 +1949,17 @@ class ProfileScreen extends StatelessWidget {
         children:[
           const Text('OPERATOR SETTINGS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
           const SizedBox(height: 16),
-          Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(children:[const Icon(Icons.person, size: 64), Text(user?.name ?? 'UNKNOWN', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20))]))),
+          Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(children:[
+            const Icon(Icons.person, size: 64), 
+            Text(user?.name ?? 'UNKNOWN', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+            const SizedBox(height: 8),
+            OutlinedButton(child: const Text('RENAME OPERATOR'), onPressed: () {
+              final c = TextEditingController(text: user?.name);
+              showDialog(context: context, builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[
+                FilledButton(child: const Text('SAVE'), onPressed: () { state.updateUserName(c.text); Navigator.pop(ctx); })
+              ]));
+            })
+          ]))),
           const SizedBox(height: 24),
           const Text('ACCOUNTS', style: TextStyle(fontWeight: FontWeight.bold)),
           ...state.users.map((u) => ListTile(title: Text(u.name), trailing: u.id == user?.id ? const Icon(Icons.check_circle) : OutlinedButton(child: const Text('SWITCH'), onPressed: () => state.switchUser(u.id)))),
