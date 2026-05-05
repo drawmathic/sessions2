@@ -23,7 +23,6 @@ void main() {
 // ==========================================
 // CONSTANTS & THEME (BRUTALIST)
 // ==========================================
-// FIX: Changed from 'final' to 'const' so they can be used in const widget constructors.
 const Color paperBg = Color(0xFFF4F0EB);
 const Color inkBlack = Color(0xFF1E1E1E);
 const Color brassAccent = Color(0xFFB58840);
@@ -145,9 +144,10 @@ class UserProfile {
 
   UserProfile({required this.id, required this.name, required this.customSubjects});
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
-    id: json['id'], name: json['name'],
-    customSubjects: List<String>.from(json['customSubjects'] ??[]),
-  );
+        id: json['id'],
+        name: json['name'],
+        customSubjects: List<String>.from(json['customSubjects'] ??[]),
+      );
   Map<String, dynamic> toJson() => {'id': id, 'name': name, 'customSubjects': customSubjects};
 }
 
@@ -157,20 +157,23 @@ class Goal {
   GoalStatus status;
   bool isLocked;
   Scope scope;
-  String referenceId; // Session ID, Day ID, or Week ID
+  String referenceId;
+  String subjectContext;
 
-  Goal({required this.id, required this.text, this.status = GoalStatus.pending, this.isLocked = false, required this.scope, required this.referenceId});
+  Goal({required this.id, required this.text, this.status = GoalStatus.pending, this.isLocked = false, required this.scope, required this.referenceId, this.subjectContext = ''});
   factory Goal.fromJson(Map<String, dynamic> json) => Goal(
-    id: json['id'], text: json['text'],
-    status: GoalStatus.values.firstWhere((e) => e.toString() == json['status'], orElse: () => GoalStatus.pending),
-    isLocked: json['isLocked'] ?? false,
-    scope: Scope.values.firstWhere((e) => e.toString() == json['scope'], orElse: () => Scope.session),
-    referenceId: json['referenceId'] ?? '',
-  );
+        id: json['id'],
+        text: json['text'],
+        status: GoalStatus.values.firstWhere((e) => e.toString() == json['status'], orElse: () => GoalStatus.pending),
+        isLocked: json['isLocked'] ?? false,
+        scope: Scope.values.firstWhere((e) => e.toString() == json['scope'], orElse: () => Scope.session),
+        referenceId: json['referenceId'] ?? '',
+        subjectContext: json['subjectContext'] ?? '',
+      );
   Map<String, dynamic> toJson() => {
-    'id': id, 'text': text, 'status': status.toString(), 'isLocked': isLocked,
-    'scope': scope.toString(), 'referenceId': referenceId,
-  };
+        'id': id, 'text': text, 'status': status.toString(), 'isLocked': isLocked,
+        'scope': scope.toString(), 'referenceId': referenceId, 'subjectContext': subjectContext,
+      };
 }
 
 class Remark {
@@ -179,27 +182,31 @@ class Remark {
   int timestamp;
   Scope scope;
   String referenceId;
+  String subjectContext;
 
-  Remark({required this.id, required this.text, required this.timestamp, required this.scope, required this.referenceId});
+  Remark({required this.id, required this.text, required this.timestamp, required this.scope, required this.referenceId, this.subjectContext = ''});
   factory Remark.fromJson(Map<String, dynamic> json) => Remark(
-    id: json['id'], text: json['text'], timestamp: json['timestamp'],
-    scope: Scope.values.firstWhere((e) => e.toString() == json['scope'], orElse: () => Scope.session),
-    referenceId: json['referenceId'] ?? '',
-  );
+        id: json['id'],
+        text: json['text'],
+        timestamp: json['timestamp'],
+        scope: Scope.values.firstWhere((e) => e.toString() == json['scope'], orElse: () => Scope.session),
+        referenceId: json['referenceId'] ?? '',
+        subjectContext: json['subjectContext'] ?? '',
+      );
   Map<String, dynamic> toJson() => {
-    'id': id, 'text': text, 'timestamp': timestamp, 'scope': scope.toString(), 'referenceId': referenceId,
-  };
+        'id': id, 'text': text, 'timestamp': timestamp, 'scope': scope.toString(), 'referenceId': referenceId, 'subjectContext': subjectContext,
+      };
 }
 
 class StudySession {
   String id;
   String name;
   String description;
-  int baseStartTime; 
-  int scheduledStartTime; 
+  int baseStartTime;
+  int scheduledStartTime;
   int durationMinutes;
   int pausedSeconds;
-  int elapsedSeconds; // FIX: This is the elapsed variable used to record actual duration
+  int elapsedSeconds;
   bool isPaused;
   SessionType type;
   String subject;
@@ -207,7 +214,7 @@ class StudySession {
   List<Goal> goals;
   List<Remark> remarks;
   SessionStatus status;
-  int? completionTime; 
+  int? completionTime;
 
   StudySession({
     required this.id, required this.name, required this.description,
@@ -218,27 +225,32 @@ class StudySession {
   });
 
   factory StudySession.fromJson(Map<String, dynamic> json) => StudySession(
-    id: json['id'], name: json['name'], description: json['description'],
-    baseStartTime: json['baseStartTime'] ?? json['scheduledStartTime'],
-    scheduledStartTime: json['scheduledStartTime'], durationMinutes: json['durationMinutes'],
-    pausedSeconds: json['pausedSeconds'] ?? 0, elapsedSeconds: json['elapsedSeconds'] ?? 0,
-    isPaused: json['isPaused'] ?? false,
-    type: SessionType.values.firstWhere((e) => e.toString() == json['type'], orElse: () => SessionType.normal),
-    subject: json['subject'], chapter: json['chapter'] ?? 'General',
-    goals: (json['goals'] as List).map((g) => Goal.fromJson(g)).toList(),
-    remarks: (json['remarks'] as List).map((r) => Remark.fromJson(r)).toList(),
-    status: SessionStatus.values.firstWhere((e) => e.toString() == json['status'], orElse: () => SessionStatus.scheduled),
-    completionTime: json['completionTime'],
-  );
+        id: json['id'],
+        name: json['name'],
+        description: json['description'],
+        baseStartTime: json['baseStartTime'] ?? json['scheduledStartTime'],
+        scheduledStartTime: json['scheduledStartTime'],
+        durationMinutes: json['durationMinutes'],
+        pausedSeconds: json['pausedSeconds'] ?? 0,
+        elapsedSeconds: json['elapsedSeconds'] ?? 0,
+        isPaused: json['isPaused'] ?? false,
+        type: SessionType.values.firstWhere((e) => e.toString() == json['type'], orElse: () => SessionType.normal),
+        subject: json['subject'],
+        chapter: json['chapter'] ?? 'General',
+        goals: (json['goals'] as List).map((g) => Goal.fromJson(g)).toList(),
+        remarks: (json['remarks'] as List).map((r) => Remark.fromJson(r)).toList(),
+        status: SessionStatus.values.firstWhere((e) => e.toString() == json['status'], orElse: () => SessionStatus.scheduled),
+        completionTime: json['completionTime'],
+      );
 
   Map<String, dynamic> toJson() => {
-    'id': id, 'name': name, 'description': description, 'baseStartTime': baseStartTime,
-    'scheduledStartTime': scheduledStartTime, 'durationMinutes': durationMinutes,
-    'pausedSeconds': pausedSeconds, 'elapsedSeconds': elapsedSeconds, 'isPaused': isPaused,
-    'type': type.toString(), 'subject': subject, 'chapter': chapter,
-    'goals': goals.map((g) => g.toJson()).toList(), 'remarks': remarks.map((r) => r.toJson()).toList(),
-    'status': status.toString(), 'completionTime': completionTime,
-  };
+        'id': id, 'name': name, 'description': description, 'baseStartTime': baseStartTime,
+        'scheduledStartTime': scheduledStartTime, 'durationMinutes': durationMinutes,
+        'pausedSeconds': pausedSeconds, 'elapsedSeconds': elapsedSeconds, 'isPaused': isPaused,
+        'type': type.toString(), 'subject': subject, 'chapter': chapter,
+        'goals': goals.map((g) => g.toJson()).toList(), 'remarks': remarks.map((r) => r.toJson()).toList(),
+        'status': status.toString(), 'completionTime': completionTime,
+      };
 
   String get dateId => DateFormat('yyyy-MM-dd').format(DateTime.fromMillisecondsSinceEpoch(scheduledStartTime));
   String get weekId {
@@ -260,11 +272,16 @@ class PlanNode {
   List<Remark> overallRemarks;
   PlanNode({required this.id, required this.customName, required this.overallGoals, required this.overallRemarks});
   factory PlanNode.fromJson(Map<String, dynamic> json) => PlanNode(
-    id: json['id'], customName: json['customName'] ?? '',
-    overallGoals: (json['overallGoals'] as List?)?.map((g) => Goal.fromJson(g)).toList() ??[],
-    overallRemarks: (json['overallRemarks'] as List?)?.map((r) => Remark.fromJson(r)).toList() ??[],
-  );
-  Map<String, dynamic> toJson() => {'id': id, 'customName': customName, 'overallGoals': overallGoals.map((g) => g.toJson()).toList(), 'overallRemarks': overallRemarks.map((r) => r.toJson()).toList()};
+        id: json['id'],
+        customName: json['customName'] ?? '',
+        overallGoals: (json['overallGoals'] as List?)?.map((g) => Goal.fromJson(g)).toList() ?? [],
+        overallRemarks: (json['overallRemarks'] as List?)?.map((r) => Remark.fromJson(r)).toList() ??[],
+      );
+  Map<String, dynamic> toJson() => {
+        'id': id, 'customName': customName,
+        'overallGoals': overallGoals.map((g) => g.toJson()).toList(),
+        'overallRemarks': overallRemarks.map((r) => r.toJson()).toList()
+      };
 }
 
 // ==========================================
@@ -286,7 +303,7 @@ class PlannerState extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   List<String> get availableSubjects {
-    List<String> base = ['Physics', 'Chemistry', 'Math', 'Biology'];
+    List<String> base =['Physics', 'Chemistry', 'Math', 'Biology'];
     if (_currentUser != null) base.addAll(_currentUser!.customSubjects);
     return base.toSet().toList();
   }
@@ -299,18 +316,22 @@ class PlannerState extends ChangeNotifier {
   StudySession? get activeSession {
     try {
       return _sessions.firstWhere((s) => s.status == SessionStatus.active);
-    } catch (e) { return null; }
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<void> initSystem() async {
     final prefs = await SharedPreferences.getInstance();
-    final usersJson = prefs.getString('sys_users_v3');
-    if (usersJson != null) _users = (jsonDecode(usersJson) as List).map((u) => UserProfile.fromJson(u)).toList();
+    final usersJson = prefs.getString('sys_users_v4');
+    if (usersJson != null) {
+      _users = (jsonDecode(usersJson) as List).map((u) => UserProfile.fromJson(u)).toList();
+    }
     if (_users.isEmpty) {
       _users.add(UserProfile(id: 'usr_${DateTime.now().millisecondsSinceEpoch}', name: 'OPERATOR_01', customSubjects:[]));
-      await prefs.setString('sys_users_v3', jsonEncode(_users.map((u) => u.toJson()).toList()));
+      await prefs.setString('sys_users_v4', jsonEncode(_users.map((u) => u.toJson()).toList()));
     }
-    final lastUserId = prefs.getString('last_user_id_v3') ?? _users.first.id;
+    final lastUserId = prefs.getString('last_user_id_v4') ?? _users.first.id;
     _currentUser = _users.firstWhere((u) => u.id == lastUserId, orElse: () => _users.first);
     await loadUserData(_currentUser!.id);
 
@@ -357,38 +378,68 @@ class PlannerState extends ChangeNotifier {
     if (needsSave) {
       notifyListeners();
       _saveCounter++;
-      if (_saveCounter > 10) { saveUserData(); _saveCounter = 0; }
+      if (_saveCounter > 5) {
+        saveUserData();
+        _saveCounter = 0;
+      }
     }
   }
 
   void _resolveOverlapsForDay(String dateId) {
     List<StudySession> daySessions = _sessions.where((s) => s.dateId == dateId && s.status != SessionStatus.terminated).toList();
     daySessions.sort((a, b) => a.baseStartTime.compareTo(b.baseStartTime));
-    
+
     for (int i = 0; i < daySessions.length - 1; i++) {
       var curr = daySessions[i];
-      var next = daySessions[i+1];
-      
-      int currEnd = curr.calculateCurrentEndTime(); 
-      int origGap = max(5 * 60 * 1000, next.baseStartTime - (curr.baseStartTime + curr.durationMinutes * 60 * 1000));
-      
-      int expectedNextStart = currEnd + origGap;
-      if (next.status == SessionStatus.scheduled && next.scheduledStartTime != expectedNextStart) {
-        next.scheduledStartTime = expectedNextStart;
+      var next = daySessions[i + 1];
+
+      int currEnd = curr.calculateCurrentEndTime();
+      int origGap = next.baseStartTime - (curr.baseStartTime + curr.durationMinutes * 60000);
+      if (origGap < 0) origGap = 0;
+
+      if (curr.status == SessionStatus.completed) {
+        int expectedNextStart = curr.completionTime! + origGap;
+        if (next.status == SessionStatus.scheduled && next.scheduledStartTime != expectedNextStart) {
+          next.scheduledStartTime = expectedNextStart;
+        }
+      } else {
+        if (currEnd > next.scheduledStartTime && next.status == SessionStatus.scheduled) {
+          next.scheduledStartTime = currEnd + 60000; // Exact 1 min gap ONLY when overlapping
+        }
       }
     }
   }
 
+  bool checkOverlapCreation(int startMs, int durationMins) {
+    int endMs = startMs + (durationMins * 60000);
+    String dId = DateFormat('yyyy-MM-dd').format(DateTime.fromMillisecondsSinceEpoch(startMs));
+    List<StudySession> daySessions = _sessions.where((s) => s.dateId == dId && s.status != SessionStatus.terminated).toList();
+    for (var s in daySessions) {
+      int sStart = s.scheduledStartTime;
+      int sEnd = s.calculateCurrentEndTime();
+      if (startMs < sEnd && endMs > sStart) return true;
+    }
+    return false;
+  }
+
   Future<void> loadUserData(String uid) async {
     final prefs = await SharedPreferences.getInstance();
-    final sJson = prefs.getString('sessions_v3_$uid');
+    final sJson = prefs.getString('sessions_v4_$uid');
     _sessions = sJson != null ? (jsonDecode(sJson) as List).map((s) => StudySession.fromJson(s)).toList() :[];
 
-    final dJson = prefs.getString('days_v3_$uid');
-    if (dJson != null) _days = (jsonDecode(dJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v))); else _days = {};
+    final dJson = prefs.getString('days_v4_$uid');
+    if (dJson != null) {
+      _days = (jsonDecode(dJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v)));
+    } else {
+      _days = {};
+    }
 
-    final wJson = prefs.getString('weeks_v3_$uid');
-    if (wJson != null) _weeks = (jsonDecode(wJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v))); else _weeks = {};
+    final wJson = prefs.getString('weeks_v4_$uid');
+    if (wJson != null) {
+      _weeks = (jsonDecode(wJson) as Map).map((k, v) => MapEntry(k.toString(), PlanNode.fromJson(v)));
+    } else {
+      _weeks = {};
+    }
 
     _isLoading = false;
     notifyListeners();
@@ -398,29 +449,32 @@ class PlannerState extends ChangeNotifier {
     if (_currentUser == null) return;
     final uid = _currentUser!.id;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sessions_v3_$uid', jsonEncode(_sessions.map((s) => s.toJson()).toList()));
-    await prefs.setString('days_v3_$uid', jsonEncode(_days.map((k, v) => MapEntry(k, v.toJson()))));
-    await prefs.setString('weeks_v3_$uid', jsonEncode(_weeks.map((k, v) => MapEntry(k, v.toJson()))));
+    await prefs.setString('sessions_v4_$uid', jsonEncode(_sessions.map((s) => s.toJson()).toList()));
+    await prefs.setString('days_v4_$uid', jsonEncode(_days.map((k, v) => MapEntry(k, v.toJson()))));
+    await prefs.setString('weeks_v4_$uid', jsonEncode(_weeks.map((k, v) => MapEntry(k, v.toJson()))));
   }
 
   Future<void> switchUser(String id) async {
-    _isLoading = true; notifyListeners();
+    _isLoading = true;
+    notifyListeners();
     _currentUser = _users.firstWhere((u) => u.id == id);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_user_id_v3', _currentUser!.id);
+    await prefs.setString('last_user_id_v4', _currentUser!.id);
     await loadUserData(_currentUser!.id);
   }
+
   Future<void> createUser(String name) async {
     _users.add(UserProfile(id: 'usr_${DateTime.now().millisecondsSinceEpoch}', name: name, customSubjects:[]));
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sys_users_v3', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    await prefs.setString('sys_users_v4', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
   }
+
   Future<void> addCustomSubject(String sub) async {
     if (_currentUser == null || _currentUser!.customSubjects.contains(sub)) return;
     _currentUser!.customSubjects.add(sub);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sys_users_v3', jsonEncode(_users.map((u) => u.toJson()).toList()));
+    await prefs.setString('sys_users_v4', jsonEncode(_users.map((u) => u.toJson()).toList()));
     notifyListeners();
   }
 
@@ -433,14 +487,16 @@ class PlannerState extends ChangeNotifier {
     }
     _sessions.sort((a, b) => a.scheduledStartTime.compareTo(b.scheduledStartTime));
     _resolveOverlapsForDay(session.dateId);
-    saveUserData(); notifyListeners();
+    saveUserData();
+    notifyListeners();
   }
 
   void togglePauseActiveSession() {
     var act = activeSession;
     if (act != null) {
       act.isPaused = !act.isPaused;
-      saveUserData(); notifyListeners();
+      saveUserData();
+      notifyListeners();
     }
   }
 
@@ -450,7 +506,8 @@ class PlannerState extends ChangeNotifier {
       _sessions[idx].status = SessionStatus.terminated;
       _sessions[idx].completionTime = DateTime.now().millisecondsSinceEpoch;
       _resolveOverlapsForDay(_sessions[idx].dateId);
-      saveUserData(); notifyListeners();
+      saveUserData();
+      notifyListeners();
     }
   }
 
@@ -460,7 +517,17 @@ class PlannerState extends ChangeNotifier {
       _sessions[idx].status = SessionStatus.completed;
       _sessions[idx].completionTime = DateTime.now().millisecondsSinceEpoch;
       _resolveOverlapsForDay(_sessions[idx].dateId);
-      saveUserData(); notifyListeners();
+      saveUserData();
+      notifyListeners();
+    }
+  }
+
+  void addGoalToSession(String sessionId, String text) {
+    int sIdx = _sessions.indexWhere((s) => s.id == sessionId);
+    if (sIdx != -1) {
+      _sessions[sIdx].goals.add(Goal(id: DateTime.now().millisecondsSinceEpoch.toString(), text: text, scope: Scope.session, referenceId: sessionId, subjectContext: _sessions[sIdx].subject));
+      saveUserData();
+      notifyListeners();
     }
   }
 
@@ -470,25 +537,30 @@ class PlannerState extends ChangeNotifier {
       int gIdx = _sessions[sIdx].goals.indexWhere((g) => g.id == goalId);
       if (gIdx != -1 && !_sessions[sIdx].goals[gIdx].isLocked) {
         _sessions[sIdx].goals[gIdx].status = status;
-        saveUserData(); notifyListeners();
+        saveUserData();
+        notifyListeners();
       }
     }
   }
+
   void lockGoal(String sessionId, String goalId) {
     int sIdx = _sessions.indexWhere((s) => s.id == sessionId);
     if (sIdx != -1) {
       int gIdx = _sessions[sIdx].goals.indexWhere((g) => g.id == goalId);
       if (gIdx != -1) {
         _sessions[sIdx].goals[gIdx].isLocked = true;
-        saveUserData(); notifyListeners();
+        saveUserData();
+        notifyListeners();
       }
     }
   }
+
   void addSessionRemark(String sessionId, String text) {
     int sIdx = _sessions.indexWhere((s) => s.id == sessionId);
     if (sIdx != -1) {
-      _sessions[sIdx].remarks.add(Remark(id: DateTime.now().millisecondsSinceEpoch.toString(), text: text, timestamp: DateTime.now().millisecondsSinceEpoch, scope: Scope.session, referenceId: sessionId));
-      saveUserData(); notifyListeners();
+      _sessions[sIdx].remarks.add(Remark(id: DateTime.now().millisecondsSinceEpoch.toString(), text: text, timestamp: DateTime.now().millisecondsSinceEpoch, scope: Scope.session, referenceId: sessionId, subjectContext: _sessions[sIdx].subject));
+      saveUserData();
+      notifyListeners();
     }
   }
 
@@ -496,13 +568,23 @@ class PlannerState extends ChangeNotifier {
     if (!_days.containsKey(dateId)) _days[dateId] = PlanNode(id: dateId, customName: '', overallGoals:[], overallRemarks: []);
     return _days[dateId]!;
   }
-  void updateDayPlan(PlanNode plan) { _days[plan.id] = plan; saveUserData(); notifyListeners(); }
-  
+
+  void updateDayPlan(PlanNode plan) {
+    _days[plan.id] = plan;
+    saveUserData();
+    notifyListeners();
+  }
+
   PlanNode getWeekPlan(String weekId) {
-    if (!_weeks.containsKey(weekId)) _weeks[weekId] = PlanNode(id: weekId, customName: '', overallGoals:[], overallRemarks: []);
+    if (!_weeks.containsKey(weekId)) _weeks[weekId] = PlanNode(id: weekId, customName: '', overallGoals: [], overallRemarks: []);
     return _weeks[weekId]!;
   }
-  void updateWeekPlan(PlanNode plan) { _weeks[plan.id] = plan; saveUserData(); notifyListeners(); }
+
+  void updateWeekPlan(PlanNode plan) {
+    _weeks[plan.id] = plan;
+    saveUserData();
+    notifyListeners();
+  }
 }
 
 // ==========================================
@@ -529,13 +611,13 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
-  final List<Widget> _screens = const [DashboardScreen(), CalendarScreen(), DataBrowserScreen(), SubjectStatsScreen(), ProfileScreen()];
+  final List<Widget> _screens = const[DashboardScreen(), CalendarScreen(), DataBrowserScreen(), GlobalStatsScreen(), ProfileScreen()];
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<PlannerState>();
     if (state.isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator(color: Colors.black)));
-    
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -548,14 +630,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(border: Border(top: BorderSide(color: inkBlack, width: 3))),
         child: NavigationBar(
-          backgroundColor: paperBg, indicatorColor: brassAccent.withOpacity(0.5),
+          backgroundColor: paperBg,
+          indicatorColor: brassAccent.withOpacity(0.5),
           selectedIndex: _currentIndex,
           onDestinationSelected: (idx) => setState(() => _currentIndex = idx),
           destinations: const[
             NavigationDestination(icon: Icon(Icons.dashboard_outlined), label: 'TODAY'),
             NavigationDestination(icon: Icon(Icons.calendar_month_outlined), label: 'PLANNER'),
             NavigationDestination(icon: Icon(Icons.hub_outlined), label: 'MATRIX'),
-            NavigationDestination(icon: Icon(Icons.query_stats), label: 'SUBJECTS'),
+            NavigationDestination(icon: Icon(Icons.query_stats), label: 'STATS'),
             NavigationDestination(icon: Icon(Icons.person_outline), label: 'PROFILE'),
           ],
         ),
@@ -626,8 +709,7 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<PlannerState>();
     final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    
-    // Exclude terminated
+
     List<StudySession> activeAndUpcoming = state.sessions.where((s) => s.dateId == todayStr && (s.status == SessionStatus.scheduled || s.status == SessionStatus.active)).toList();
     List<StudySession> completed = state.sessions.where((s) => s.dateId == todayStr && s.status == SessionStatus.completed).toList();
 
@@ -635,7 +717,7 @@ class DashboardScreen extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children:[
+        children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children:[
@@ -648,7 +730,6 @@ class DashboardScreen extends StatelessWidget {
           const SizedBox(height: 16),
           if (activeAndUpcoming.isEmpty) const Card(child: Padding(padding: EdgeInsets.all(24), child: Text('NO UPCOMING OPERATIONS.'))),
           ...activeAndUpcoming.map((s) => _buildSessionCard(context, s)),
-          
           const SizedBox(height: 32),
           const Text('COMPLETED', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54)),
           const SizedBox(height: 16),
@@ -662,7 +743,7 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildSessionCard(BuildContext context, StudySession s) {
     Color bColor = s.status == SessionStatus.active ? steamGreen : (s.type == SessionType.intense ? intensePurple : (s.type == SessionType.important ? importantBlue : inkBlack));
     String timeLabel = DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.scheduledStartTime));
-    
+
     return Card(
       child: InkWell(
         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SessionDetailScreen(session: s))),
@@ -670,7 +751,7 @@ class DashboardScreen extends StatelessWidget {
           decoration: BoxDecoration(border: Border(left: BorderSide(color: bColor, width: 8))),
           padding: const EdgeInsets.all(16),
           child: Row(
-            children:[
+            children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children:[
@@ -724,41 +805,91 @@ class _SessionEditorScreenState extends State<SessionEditorScreen> {
     super.initState();
     if (widget.existing != null) {
       final s = widget.existing!;
-      _nameCtrl.text = s.name; _descCtrl.text = s.description; _durCtrl.text = s.durationMinutes.toString();
+      _nameCtrl.text = s.name;
+      _descCtrl.text = s.description;
+      _durCtrl.text = s.durationMinutes.toString();
       _date = DateTime.fromMillisecondsSinceEpoch(s.baseStartTime);
       _time = TimeOfDay.fromDateTime(_date);
-      _type = s.type; _subject = s.subject; _chapter = s.chapter;
+      _type = s.type;
+      _subject = s.subject;
+      _chapter = s.chapter;
       _goals = List.from(s.goals);
     }
   }
 
+  void _setToCurrentTime() {
+    setState(() {
+      _date = DateTime.now();
+      _time = TimeOfDay.now();
+    });
+  }
+
   void _save(PlannerState state) {
     if (_nameCtrl.text.isEmpty || _durCtrl.text.isEmpty || _subject == null || _chapter == null) {
-      // FIX: Changed rustRed from final to const at top so this works now
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('MISSING FIELDS'), backgroundColor: rustRed)); return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('MISSING FIELDS'), backgroundColor: rustRed));
+      return;
     }
     DateTime fullDt = DateTime(_date.year, _date.month, _date.day, _time.hour, _time.minute);
-    if (fullDt.isBefore(DateTime.now()) && widget.existing == null) fullDt = DateTime.now(); // Auto-adjust past creations
-    
+
+    int reqDuration = int.parse(_durCtrl.text);
+    bool overlap = state.checkOverlapCreation(fullDt.millisecondsSinceEpoch, reqDuration);
+
+    if (overlap && widget.existing == null) {
+      showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+                title: const Text('OVERLAP DETECTED'),
+                content: const Text('THIS TIME PERIOD INTERSECTS WITH AN EXISTING OPERATION. PROCEED ANYWAY?'),
+                actions:[
+                  OutlinedButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
+                  FilledButton(
+                      style: FilledButton.styleFrom(backgroundColor: rustRed),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        _executeSave(state, fullDt, reqDuration);
+                      },
+                      child: const Text('PROCEED'))
+                ],
+              ));
+    } else {
+      _executeSave(state, fullDt, reqDuration);
+    }
+  }
+
+  void _executeSave(PlannerState state, DateTime fullDt, int reqDuration) {
     if (widget.existing != null) {
       final s = widget.existing!;
-      s.name = _nameCtrl.text; s.description = _descCtrl.text;
+      s.name = _nameCtrl.text;
+      s.description = _descCtrl.text;
       if (s.status == SessionStatus.scheduled) {
-        s.durationMinutes = int.parse(_durCtrl.text);
+        s.durationMinutes = reqDuration;
         s.baseStartTime = fullDt.millisecondsSinceEpoch;
-        s.scheduledStartTime = s.baseStartTime; // Reset schedule
-        s.type = _type; s.subject = _subject!; s.chapter = _chapter!; s.goals = _goals;
+        s.scheduledStartTime = s.baseStartTime;
+        s.type = _type;
+        s.subject = _subject!;
+        s.chapter = _chapter!;
+        s.goals = _goals;
       }
       state.saveSession(s);
     } else {
       String id = 'sess_${DateTime.now().millisecondsSinceEpoch}';
-      for(var g in _goals) { g.referenceId = id; g.scope = Scope.session; }
+      for (var g in _goals) {
+        g.referenceId = id;
+        g.scope = Scope.session;
+        g.subjectContext = _subject!;
+      }
       final s = StudySession(
-        id: id, name: _nameCtrl.text, description: _descCtrl.text,
-        baseStartTime: fullDt.millisecondsSinceEpoch, scheduledStartTime: fullDt.millisecondsSinceEpoch,
-        durationMinutes: int.parse(_durCtrl.text), type: _type, subject: _subject!, chapter: _chapter!,
-        goals: _goals, remarks:[]
-      );
+          id: id,
+          name: _nameCtrl.text,
+          description: _descCtrl.text,
+          baseStartTime: fullDt.millisecondsSinceEpoch,
+          scheduledStartTime: fullDt.millisecondsSinceEpoch,
+          durationMinutes: reqDuration,
+          type: _type,
+          subject: _subject!,
+          chapter: _chapter!,
+          goals: _goals,
+          remarks:[]);
       state.saveSession(s, isNew: true);
     }
     Navigator.pop(context);
@@ -803,13 +934,32 @@ class _SessionEditorScreenState extends State<SessionEditorScreen> {
                 Expanded(child: OutlinedButton.icon(icon: const Icon(Icons.access_time), label: Text(_time.format(context)), onPressed: isLocked ? null : () async { final t = await showTimePicker(context: context, initialTime: _time); if (t != null) setState(() => _time = t); })),
               ],
             ),
+            if (!isLocked)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: OutlinedButton(onPressed: _setToCurrentTime, child: const Text('SET CREATION/INITIATION TIME TO NOW')),
+              ),
             const SizedBox(height: 32),
             const Text('SESSION GOALS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             ..._goals.map((g) => Card(child: ListTile(title: Text(g.text), trailing: IconButton(icon: const Icon(Icons.delete), onPressed: isLocked ? null : () => setState(() => _goals.remove(g)))))),
-            if (!isLocked) FilledButton.icon(icon: const Icon(Icons.add), label: const Text('ADD GOAL'), onPressed: () {
-              final c = TextEditingController();
-              showDialog(context: context, builder: (ctx) => AlertDialog(title: const Text('NEW GOAL'), content: TextField(controller: c), actions:[OutlinedButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')), FilledButton(onPressed: () { if (c.text.isNotEmpty) setState(() => _goals.add(Goal(id: DateTime.now().millisecondsSinceEpoch.toString(), text: c.text, scope: Scope.session, referenceId: ''))); Navigator.pop(ctx); }, child: const Text('ADD'))]));
-            }),
+            if (!isLocked)
+              FilledButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: const Text('ADD GOAL'),
+                  onPressed: () {
+                    final c = TextEditingController();
+                    showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(title: const Text('NEW GOAL'), content: TextField(controller: c), actions:[
+                              OutlinedButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
+                              FilledButton(
+                                  onPressed: () {
+                                    if (c.text.isNotEmpty) setState(() => _goals.add(Goal(id: DateTime.now().millisecondsSinceEpoch.toString(), text: c.text, scope: Scope.session, referenceId: '', subjectContext: _subject!)));
+                                    Navigator.pop(ctx);
+                                  },
+                                  child: const Text('ADD'))
+                            ]));
+                  }),
             const SizedBox(height: 48),
             FilledButton(onPressed: () => _save(state), child: const Text('SAVE MANIFEST')),
           ],
@@ -827,21 +977,33 @@ class SessionDetailScreen extends StatelessWidget {
   const SessionDetailScreen({super.key, required this.session});
 
   void _confirmTerminate(BuildContext context, PlannerState state, String id) {
-    showDialog(context: context, builder: (ctx) => AlertDialog(
-      title: const Text('CRITICAL WARNING'),
-      content: const Text('TERMINATING A SESSION WILL REMOVE IT FROM STATS AND LOGS COMPLETELY. PROCEED?'),
-      actions:[
-        OutlinedButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
-        FilledButton(style: FilledButton.styleFrom(backgroundColor: rustRed), onPressed: () { state.terminateSession(id); Navigator.pop(ctx); Navigator.pop(context); }, child: const Text('TERMINATE')),
-      ]
-    ));
+    showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+              title: const Text('CRITICAL WARNING'),
+              content: const Text('TERMINATING A SESSION WILL REMOVE IT FROM STATS AND LOGS COMPLETELY. PROCEED?'),
+              actions:[
+                OutlinedButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
+                FilledButton(
+                    style: FilledButton.styleFrom(backgroundColor: rustRed),
+                    onPressed: () {
+                      state.terminateSession(id);
+                      Navigator.pop(ctx);
+                      Navigator.pop(context);
+                    },
+                    child: const Text('TERMINATE'))
+              ],
+            ));
   }
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<PlannerState>();
     final s = state.sessions.firstWhere((x) => x.id == session.id, orElse: () => session);
-    bool canCompleteEarly = s.status == SessionStatus.active && !s.goals.any((g) => g.status == GoalStatus.pending);
+
+    // "COMPLETE SESSION" early logic: Check if running and ALL goals are resolved (none pending).
+    bool allGoalsResolved = s.goals.isNotEmpty && !s.goals.any((g) => g.status == GoalStatus.pending);
+    bool canCompleteEarly = s.status == SessionStatus.active && allGoalsResolved;
 
     return Scaffold(
       appBar: AppBar(
@@ -851,7 +1013,9 @@ class SessionDetailScreen extends StatelessWidget {
           PopupMenuButton(
             icon: const Icon(Icons.more_vert),
             itemBuilder: (_) => const[PopupMenuItem(value: 'term', child: Text('TERMINATE OPERATION', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)))],
-            onSelected: (v) { if (v == 'term') _confirmTerminate(context, state, s.id); },
+            onSelected: (v) {
+              if (v == 'term') _confirmTerminate(context, state, s.id);
+            },
           )
         ],
       ),
@@ -866,34 +1030,81 @@ class SessionDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children:[
-                  Text(s.name.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children:[
+                      Expanded(child: Text(s.name.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24))),
+                      if (s.status == SessionStatus.active)
+                        IconButton(
+                          icon: Icon(s.isPaused ? Icons.play_arrow : Icons.pause, size: 32),
+                          onPressed: () => state.togglePauseActiveSession(),
+                        )
+                    ],
+                  ),
                   Text(s.description),
                   const Divider(height: 32),
                   Text('STATUS: ${s.status.name.toUpperCase()}', style: TextStyle(fontWeight: FontWeight.bold, color: s.status == SessionStatus.completed ? steamGreen : (s.status == SessionStatus.active ? brassAccent : inkBlack))),
-                  Text('SCHEDULED (BASE): ${DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.baseStartTime))}'),
-                  Text('SCHEDULED (DYN): ${DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.scheduledStartTime))}'),
+                  Text('SCHEDULED: ${DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.scheduledStartTime))}'),
                   Text('PAUSED EXTENSION: ${s.pausedSeconds} SEC'),
                   if (s.status == SessionStatus.completed) Text('ACTUAL END: ${DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.completionTime!))}'),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            if (canCompleteEarly) FilledButton(style: FilledButton.styleFrom(backgroundColor: steamGreen), onPressed: () { state.completeSessionEarly(s.id); Navigator.pop(context); }, child: const Text('ALL GOALS MET: COMPLETE SESSION')),
+            if (canCompleteEarly)
+              FilledButton(
+                  style: FilledButton.styleFrom(backgroundColor: steamGreen),
+                  onPressed: () {
+                    state.completeSessionEarly(s.id);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('ALL GOALS MET: COMPLETE SESSION')),
             const SizedBox(height: 24),
-            const Text('GOALS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children:[
+                const Text('GOALS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                if (s.status == SessionStatus.active)
+                  IconButton(
+                      icon: const Icon(Icons.add_task),
+                      onPressed: () {
+                        final ctrl = TextEditingController();
+                        showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(title: const Text('NEW ONGOING GOAL'), content: TextField(controller: ctrl), actions:[
+                                  OutlinedButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
+                                  FilledButton(
+                                      onPressed: () {
+                                        if (ctrl.text.isNotEmpty) state.addGoalToSession(s.id, ctrl.text);
+                                        Navigator.pop(ctx);
+                                      },
+                                      child: const Text('ADD'))
+                                ]));
+                      })
+              ],
+            ),
             ...s.goals.map((g) => _buildGoalTile(context, state, s.id, g)),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children:[
                 const Text('REMARKS LOG', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                IconButton(icon: const Icon(Icons.add_comment), onPressed: () {
-                  final ctrl = TextEditingController();
-                  showDialog(context: context, builder: (ctx) => AlertDialog(
-                    title: const Text('ADD REMARK'), content: TextField(controller: ctrl),
-                    actions:[OutlinedButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')), FilledButton(onPressed: () { if (ctrl.text.isNotEmpty) state.addSessionRemark(s.id, ctrl.text); Navigator.pop(ctx); }, child: const Text('ADD'))]
-                  ));
-                })
+                IconButton(
+                    icon: const Icon(Icons.add_comment),
+                    onPressed: () {
+                      final ctrl = TextEditingController();
+                      showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(title: const Text('ADD REMARK'), content: TextField(controller: ctrl), actions:[
+                                OutlinedButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
+                                FilledButton(
+                                    onPressed: () {
+                                      if (ctrl.text.isNotEmpty) state.addSessionRemark(s.id, ctrl.text);
+                                      Navigator.pop(ctx);
+                                    },
+                                    child: const Text('ADD'))
+                              ]));
+                    })
               ],
             ),
             ...s.remarks.map((r) => Card(child: ListTile(title: Text(r.text), subtitle: Text(DateFormat('MM/dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(r.timestamp)))))),
@@ -904,22 +1115,34 @@ class SessionDetailScreen extends StatelessWidget {
   }
 
   Widget _buildGoalTile(BuildContext context, PlannerState state, String sessionId, Goal g) {
-    IconData icon = Icons.check_box_outline_blank;
+    IconData icon = Icons.circle_outlined;
     Color color = inkBlack;
-    if (g.status == GoalStatus.completed) { icon = Icons.check_box; color = steamGreen; }
-    if (g.status == GoalStatus.failed) { icon = Icons.cancel; color = rustRed; }
+    if (g.status == GoalStatus.completed) {
+      icon = Icons.check_circle;
+      color = steamGreen;
+    }
+    if (g.status == GoalStatus.failed) {
+      icon = Icons.cancel;
+      color = rustRed;
+    }
 
     return ListTile(
-      leading: IconButton(icon: Icon(icon, color: color), onPressed: g.isLocked ? null : () {
-        GoalStatus next = GoalStatus.pending;
-        if (g.status == GoalStatus.pending) next = GoalStatus.completed;
-        else if (g.status == GoalStatus.completed) next = GoalStatus.failed;
-        state.markGoal(sessionId, g.id, next);
-      }),
+      leading: IconButton(
+          icon: Icon(icon, color: color),
+          onPressed: g.isLocked
+              ? null
+              : () {
+                  GoalStatus next = GoalStatus.pending;
+                  if (g.status == GoalStatus.pending) next = GoalStatus.completed;
+                  else if (g.status == GoalStatus.completed) next = GoalStatus.failed;
+                  state.markGoal(sessionId, g.id, next);
+                }),
       title: Text(g.text, style: TextStyle(decoration: g.status == GoalStatus.completed ? TextDecoration.lineThrough : null, color: g.status == GoalStatus.failed ? rustRed : inkBlack)),
-      trailing: IconButton(icon: Icon(g.isLocked ? Icons.lock : Icons.lock_open, color: g.isLocked ? rustRed : Colors.black38), onPressed: () {
-        if (!g.isLocked) state.lockGoal(sessionId, g.id);
-      }),
+      trailing: IconButton(
+          icon: Icon(g.isLocked ? Icons.lock : Icons.lock_open, color: g.isLocked ? rustRed : Colors.black38),
+          onPressed: () {
+            if (!g.isLocked) state.lockGoal(sessionId, g.id);
+          }),
     );
   }
 }
@@ -950,12 +1173,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
       child: Column(
         children:[
           Container(
-            padding: const EdgeInsets.all(16), color: inkBlack,
+            padding: const EdgeInsets.all(16),
+            color: inkBlack,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children:[
                 IconButton(icon: const Icon(Icons.arrow_back_ios, color: Colors.white), onPressed: () => setState(() => _date = _date.subtract(const Duration(days: 1)))),
-                InkWell(onTap: () async { final d = await showDatePicker(context: context, initialDate: _date, firstDate: DateTime(2020), lastDate: DateTime(2035)); if (d != null) setState(() => _date = d); }, child: Text(DateFormat('EEEE, MMM dd, yyyy').format(_date).toUpperCase(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16))),
+                InkWell(
+                    onTap: () async {
+                      final d = await showDatePicker(context: context, initialDate: _date, firstDate: DateTime(2020), lastDate: DateTime(2035));
+                      if (d != null) setState(() => _date = d);
+                    },
+                    child: Text(DateFormat('EEEE, MMM dd, yyyy').format(_date).toUpperCase(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16))),
                 IconButton(icon: const Icon(Icons.arrow_forward_ios, color: Colors.white), onPressed: () => setState(() => _date = _date.add(const Duration(days: 1)))),
               ],
             ),
@@ -972,34 +1201,87 @@ class _CalendarScreenState extends State<CalendarScreen> {
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children:[
-          Row(children:[Expanded(child: Text(plan.customName.isEmpty ? 'UNNAMED ${scope.name.toUpperCase()}' : plan.customName.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20))), IconButton(icon: const Icon(Icons.edit), onPressed: () {
-            final c = TextEditingController(text: plan.customName);
-            showDialog(context: context, builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[FilledButton(onPressed: () { plan.customName = c.text; if (scope == Scope.day) state.updateDayPlan(plan); else state.updateWeekPlan(plan); Navigator.pop(ctx); }, child: const Text('SAVE'))]));
-          })]),
+        children: [
+          Row(children:[
+            Expanded(child: Text(plan.customName.isEmpty ? 'UNNAMED ${scope.name.toUpperCase()}' : plan.customName.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
+            IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () {
+                  final c = TextEditingController(text: plan.customName);
+                  showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[
+                            FilledButton(
+                                onPressed: () {
+                                  plan.customName = c.text;
+                                  if (scope == Scope.day) state.updateDayPlan(plan);
+                                  else state.updateWeekPlan(plan);
+                                  Navigator.pop(ctx);
+                                },
+                                child: const Text('SAVE'))
+                          ]));
+                })
+          ]),
           const Divider(),
           const Text('OVERALL GOALS', style: TextStyle(fontWeight: FontWeight.bold)),
           ...plan.overallGoals.map((g) => ListTile(
-            leading: Icon(g.status == GoalStatus.completed ? Icons.check_box : (g.status == GoalStatus.failed ? Icons.cancel : Icons.check_box_outline_blank), color: g.status == GoalStatus.failed ? rustRed : inkBlack),
-            title: Text(g.text, style: TextStyle(decoration: g.status == GoalStatus.completed ? TextDecoration.lineThrough : null)),
-            trailing: IconButton(icon: Icon(g.isLocked ? Icons.lock : Icons.lock_open), onPressed: () { g.isLocked = true; scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan); }),
-            onTap: g.isLocked ? null : () { g.status = g.status == GoalStatus.pending ? GoalStatus.completed : (g.status == GoalStatus.completed ? GoalStatus.failed : GoalStatus.pending); scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan); },
-          )),
-          FilledButton.icon(icon: const Icon(Icons.add), label: const Text('ADD GOAL'), onPressed: () {
-            final c = TextEditingController();
-            showDialog(context: context, builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[FilledButton(onPressed: () { plan.overallGoals.add(Goal(id: DateTime.now().millisecondsSinceEpoch.toString(), text: c.text, scope: scope, referenceId: refId)); scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan); Navigator.pop(ctx); }, child: const Text('ADD'))]));
-          }),
+                leading: Icon(g.status == GoalStatus.completed ? Icons.check_box : (g.status == GoalStatus.failed ? Icons.cancel : Icons.check_box_outline_blank), color: g.status == GoalStatus.failed ? rustRed : inkBlack),
+                title: Text(g.text, style: TextStyle(decoration: g.status == GoalStatus.completed ? TextDecoration.lineThrough : null)),
+                trailing: IconButton(
+                    icon: Icon(g.isLocked ? Icons.lock : Icons.lock_open, color: g.isLocked ? rustRed : Colors.black38),
+                    onPressed: () {
+                      g.isLocked = true;
+                      scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan);
+                    }),
+                onTap: g.isLocked
+                    ? null
+                    : () {
+                        g.status = g.status == GoalStatus.pending ? GoalStatus.completed : (g.status == GoalStatus.completed ? GoalStatus.failed : GoalStatus.pending);
+                        scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan);
+                      },
+              )),
+          FilledButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text('ADD GOAL'),
+              onPressed: () {
+                final c = TextEditingController();
+                showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[
+                          FilledButton(
+                              onPressed: () {
+                                plan.overallGoals.add(Goal(id: DateTime.now().millisecondsSinceEpoch.toString(), text: c.text, scope: scope, referenceId: refId));
+                                scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan);
+                                Navigator.pop(ctx);
+                              },
+                              child: const Text('ADD'))
+                        ]));
+              }),
           const SizedBox(height: 24),
           const Text('OVERALL REMARKS', style: TextStyle(fontWeight: FontWeight.bold)),
           ...plan.overallRemarks.map((r) => Card(color: brassAccent.withOpacity(0.1), child: ListTile(title: Text(r.text), subtitle: Text(DateFormat('MM/dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(r.timestamp)))))),
-          FilledButton.icon(icon: const Icon(Icons.add), label: const Text('ADD REMARK'), onPressed: () {
-            final c = TextEditingController();
-            showDialog(context: context, builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[FilledButton(onPressed: () { plan.overallRemarks.add(Remark(id: DateTime.now().millisecondsSinceEpoch.toString(), text: c.text, timestamp: DateTime.now().millisecondsSinceEpoch, scope: scope, referenceId: refId)); scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan); Navigator.pop(ctx); }, child: const Text('ADD'))]));
-          }),
+          FilledButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text('ADD REMARK'),
+              onPressed: () {
+                final c = TextEditingController();
+                showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[
+                          FilledButton(
+                              onPressed: () {
+                                plan.overallRemarks.add(Remark(id: DateTime.now().millisecondsSinceEpoch.toString(), text: c.text, timestamp: DateTime.now().millisecondsSinceEpoch, scope: scope, referenceId: refId));
+                                scope == Scope.day ? state.updateDayPlan(plan) : state.updateWeekPlan(plan);
+                                Navigator.pop(ctx);
+                              },
+                              child: const Text('ADD'))
+                        ]));
+              }),
           if (scope == Scope.day) ...[
             const SizedBox(height: 24),
             const Text('SCHEDULED OPERATIONS', style: TextStyle(fontWeight: FontWeight.bold)),
-            ...sessions.map((s) => ListTile(title: Text(s.name), subtitle: Text('${DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.scheduledStartTime))} | ${s.status.name.toUpperCase()}'), trailing: OutlinedButton(child: const Text('OPEN'), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SessionDetailScreen(session: s))))))
+            ...sessions.map((s) => ListTile(
+                title: Text(s.name), subtitle: Text('${DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.scheduledStartTime))} | ${s.status.name.toUpperCase()}'), trailing: OutlinedButton(child: const Text('OPEN'), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SessionDetailScreen(session: s))))))
           ]
         ],
       ),
@@ -1008,30 +1290,58 @@ class _CalendarScreenState extends State<CalendarScreen> {
 }
 
 // ==========================================
-// SUBJECT & CHAPTER STATS SCREEN
+// GLOBAL & SUBJECT STATS SCREEN
 // ==========================================
-class SubjectStatsScreen extends StatelessWidget {
-  const SubjectStatsScreen({super.key});
+class GlobalStatsScreen extends StatelessWidget {
+  const GlobalStatsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<PlannerState>();
     final validSessions = state.sessions.where((s) => s.status == SessionStatus.completed).toList();
 
-    // FIX: Using strongly typed map to avoid 'num vs int' coercion errors
     Map<String, int> subHours = {};
     for (var s in validSessions) {
       int currentVal = subHours[s.subject] ?? 0;
-      // FIX: Using elapsedSeconds which replaces actualDurationSeconds
       subHours[s.subject] = currentVal + s.elapsedSeconds;
     }
+
+    List<BarChartGroupData> barGroups = [];
+    List<String> subLabels =[];
+    int xIndex = 0;
+    subHours.forEach((sub, secs) {
+      barGroups.add(BarChartGroupData(x: xIndex++, barRods:[BarChartRodData(toY: secs / 3600.0, color: inkBlack, width: 20, borderRadius: BorderRadius.zero)]));
+      subLabels.add(sub.length > 4 ? sub.substring(0, 4) : sub);
+    });
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children:[
-          const Text('SUBJECT TELEMETRY', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+          const Text('GLOBAL TELEMETRY', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+          const SizedBox(height: 16),
+          if (barGroups.isNotEmpty)
+            Container(
+              height: 250,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)),
+              child: BarChart(BarChartData(
+                titlesData: FlTitlesData(
+                  bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, getTitlesWidget: (val, meta) => Padding(padding: const EdgeInsets.only(top: 8), child: Text(subLabels[val.toInt()], style: const TextStyle(fontSize: 10))))),
+                  leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40, getTitlesWidget: (val, meta) => Text('${val.toInt()}h', style: const TextStyle(fontSize: 12)))),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                ),
+                gridData: FlGridData(show: true, drawVerticalLine: false, getDrawingHorizontalLine: (v) => const FlLine(color: Colors.black26, strokeWidth: 1, dashArray: [4, 4])),
+                borderData: FlBorderData(show: false),
+                barGroups: barGroups,
+              )),
+            )
+          else
+            const Card(child: Padding(padding: EdgeInsets.all(24), child: Text('NOT ENOUGH DATA FOR GRAPH.'))),
+          const SizedBox(height: 32),
+          const Text('SUBJECT DIRECTORIES', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           const SizedBox(height: 16),
           ...state.availableSubjects.map((sub) {
             int seconds = subHours[sub] ?? 0;
@@ -1040,7 +1350,7 @@ class SubjectStatsScreen extends StatelessWidget {
                 title: Text(sub.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text('TOTAL TIME: ${(seconds / 3600).toStringAsFixed(1)} HOURS'),
                 trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChapterStatsScreen(subject: sub))),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SubjectSpecificScreen(subject: sub))),
               ),
             );
           }),
@@ -1050,35 +1360,87 @@ class SubjectStatsScreen extends StatelessWidget {
   }
 }
 
-class ChapterStatsScreen extends StatelessWidget {
+class SubjectSpecificScreen extends StatelessWidget {
   final String subject;
-  const ChapterStatsScreen({super.key, required this.subject});
+  const SubjectSpecificScreen({super.key, required this.subject});
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<PlannerState>();
+    final sessions = state.sessions.where((s) => s.subject == subject && s.status != SessionStatus.terminated).toList();
     final chapters = state.getChaptersForSubject(subject);
-    final validSessions = state.sessions.where((s) => s.status == SessionStatus.completed && s.subject == subject).toList();
 
-    // FIX: Explicit strong typing to prevent compilation issues with '? ?? 0'
-    Map<String, int> chapSecs = {};
-    for (var s in validSessions) {
-      int currentVal = chapSecs[s.chapter] ?? 0;
-      // FIX: Using elapsedSeconds which replaces actualDurationSeconds
-      chapSecs[s.chapter] = currentVal + s.elapsedSeconds;
-    }
-
-    return Scaffold(
-      appBar: AppBar(title: Text('TELEMETRY: ${subject.toUpperCase()}')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: chapters.map((c) => Card(
-            child: ListTile(
-              title: Text(c.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-              trailing: Text('${((chapSecs[c] ?? 0) / 3600).toStringAsFixed(1)} H', style: const TextStyle(fontWeight: FontWeight.bold)),
+    return DefaultTabController(
+      length: 4,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(subject.toUpperCase()),
+          bottom: const TabBar(
+              indicatorColor: inkBlack,
+              labelColor: inkBlack,
+              isScrollable: true,
+              tabs:[Tab(text: 'CHAPTERS'), Tab(text: 'SESSIONS'), Tab(text: 'GOALS'), Tab(text: 'REMARKS')]),
+        ),
+        body: TabBarView(
+          children:[
+            // CHAPTERS TAB
+            ListView(
+              padding: const EdgeInsets.all(16),
+              children: chapters.map((c) {
+                int chapSecs = sessions.where((s) => s.chapter == c && s.status == SessionStatus.completed).fold(0, (sum, s) => sum + s.elapsedSeconds);
+                return Card(
+                    child: ListTile(
+                  title: Text(c, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  trailing: Text('${(chapSecs / 3600).toStringAsFixed(1)} H', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChapterSpecificScreen(subject: subject, chapter: c))),
+                ));
+              }).toList(),
             ),
-          )).toList(),
+            // SESSIONS TAB
+            ListView(
+              padding: const EdgeInsets.all(16),
+              children: sessions.map((s) => ListTile(title: Text(s.name), subtitle: Text('${s.chapter} | ${s.status.name.toUpperCase()}'), trailing: OutlinedButton(child: const Text('OPEN'), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SessionDetailScreen(session: s)))))).toList(),
+            ),
+            // GOALS TAB
+            ListView(
+              padding: const EdgeInsets.all(16),
+              children: sessions.expand((s) => s.goals.map((g) => ListTile(title: Text(g.text), subtitle: Text('${s.chapter} | ${g.status.name.toUpperCase()}')))).toList(),
+            ),
+            // REMARKS TAB
+            ListView(
+              padding: const EdgeInsets.all(16),
+              children: sessions.expand((s) => s.remarks.map((r) => Card(child: ListTile(title: Text(r.text), subtitle: Text('${s.chapter} | ${DateFormat('MM/dd').format(DateTime.fromMillisecondsSinceEpoch(r.timestamp))}'))))).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ChapterSpecificScreen extends StatelessWidget {
+  final String subject;
+  final String chapter;
+  const ChapterSpecificScreen({super.key, required this.subject, required this.chapter});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<PlannerState>();
+    final sessions = state.sessions.where((s) => s.subject == subject && s.chapter == chapter && s.status != SessionStatus.terminated).toList();
+
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('CHAPTER DETAILS'),
+          bottom: const TabBar(indicatorColor: inkBlack, labelColor: inkBlack, tabs:[Tab(text: 'SESSIONS'), Tab(text: 'GOALS'), Tab(text: 'REMARKS')]),
+        ),
+        body: TabBarView(
+          children:[
+            ListView(padding: const EdgeInsets.all(16), children: sessions.map((s) => ListTile(title: Text(s.name), subtitle: Text(s.status.name.toUpperCase()), trailing: OutlinedButton(child: const Text('OPEN'), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SessionDetailScreen(session: s)))))).toList()),
+            ListView(padding: const EdgeInsets.all(16), children: sessions.expand((s) => s.goals.map((g) => ListTile(title: Text(g.text), subtitle: Text(g.status.name.toUpperCase())))).toList()),
+            ListView(padding: const EdgeInsets.all(16), children: sessions.expand((s) => s.remarks.map((r) => Card(child: ListTile(title: Text(r.text), subtitle: Text(DateFormat('MM/dd').format(DateTime.fromMillisecondsSinceEpoch(r.timestamp))))))).toList()),
+          ],
         ),
       ),
     );
@@ -1097,39 +1459,66 @@ class DataBrowserScreen extends StatefulWidget {
 class _DataBrowserScreenState extends State<DataBrowserScreen> {
   String? _subFilter;
   Scope? _scopeFilter;
+  bool _incSessions = true;
+  bool _incGoals = true;
+  bool _incRemarks = true;
+  bool _incPending = true;
+  bool _incCompleted = true;
+  bool _incFailed = true;
 
-  void _copyMatrix(PlannerState state) {
+  String _generateMatrixText(PlannerState state) {
     StringBuffer sb = StringBuffer();
     sb.writeln("=== DATA MATRIX EXPORT (${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())}) ===");
-    
-    List<Goal> goals =[];
-    List<Remark> remarks =[];
-    
-    for (var s in state.sessions.where((x) => x.status != SessionStatus.terminated)) {
-      if (_subFilter != null && s.subject != _subFilter) continue;
-      if (_scopeFilter == null || _scopeFilter == Scope.session) {
-        goals.addAll(s.goals); remarks.addAll(s.remarks);
+
+    List<StudySession> validSessions = state.sessions.where((s) => s.status != SessionStatus.terminated).toList();
+    if (_subFilter != null) validSessions = validSessions.where((s) => s.subject == _subFilter).toList();
+
+    if (_incSessions) {
+      sb.writeln("\n>>> SESSIONS DIRECTORY");
+      for (var s in validSessions) {
+        sb.writeln("[${s.status.name.toUpperCase()}] ${s.name} | ${s.subject} -> ${s.chapter} (${DateFormat('MM/dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(s.scheduledStartTime))})");
       }
     }
-    
-    sb.writeln("\n>>> GOALS DIRECTORY");
-    for (var g in goals) {
-      String marker = g.status == GoalStatus.pending ? '[ ]' : (g.status == GoalStatus.completed ? '[X]' : '[!]');
-      sb.writeln("$marker ${g.text} (${g.scope.name.toUpperCase()})");
+
+    if (_incGoals) {
+      sb.writeln("\n>>> GOALS DIRECTORY");
+      List<Goal> allGoals =[];
+      if (_scopeFilter == null || _scopeFilter == Scope.session) {
+        allGoals.addAll(validSessions.expand((s) => s.goals));
+      }
+      if (_subFilter == null) {
+        if (_scopeFilter == null || _scopeFilter == Scope.day) allGoals.addAll(state._days.values.expand((d) => d.overallGoals));
+        if (_scopeFilter == null || _scopeFilter == Scope.week) allGoals.addAll(state._weeks.values.expand((w) => w.overallGoals));
+      }
+      for (var g in allGoals) {
+        if (!((g.status == GoalStatus.pending && _incPending) || (g.status == GoalStatus.completed && _incCompleted) || (g.status == GoalStatus.failed && _incFailed))) continue;
+        String marker = g.status == GoalStatus.pending ? '[ ]' : (g.status == GoalStatus.completed ? '[X]' : '[!]');
+        sb.writeln("$marker ${g.text} | Scope: ${g.scope.name.toUpperCase()} | Sub: ${g.subjectContext.isNotEmpty ? g.subjectContext : 'GLOBAL'}");
+      }
     }
 
-    sb.writeln("\n>>> REMARKS DIRECTORY");
-    for (var r in remarks) {
-      sb.writeln("* ${r.text}[${DateFormat('MM/dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(r.timestamp))}]");
+    if (_incRemarks) {
+      sb.writeln("\n>>> REMARKS DIRECTORY");
+      List<Remark> allRemarks =[];
+      if (_scopeFilter == null || _scopeFilter == Scope.session) {
+        allRemarks.addAll(validSessions.expand((s) => s.remarks));
+      }
+      if (_subFilter == null) {
+        if (_scopeFilter == null || _scopeFilter == Scope.day) allRemarks.addAll(state._days.values.expand((d) => d.overallRemarks));
+        if (_scopeFilter == null || _scopeFilter == Scope.week) allRemarks.addAll(state._weeks.values.expand((w) => w.overallRemarks));
+      }
+      for (var r in allRemarks) {
+        sb.writeln("* ${r.text} | Scope: ${r.scope.name.toUpperCase()} | Sub: ${r.subjectContext.isNotEmpty ? r.subjectContext : 'GLOBAL'} | Time: ${DateFormat('MM/dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(r.timestamp))}");
+      }
     }
 
-    Clipboard.setData(ClipboardData(text: sb.toString()));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('MATRIX COPIED TO CLIPBOARD')));
+    return sb.toString();
   }
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<PlannerState>();
+    String generatedText = _generateMatrixText(state);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -1139,17 +1528,50 @@ class _DataBrowserScreenState extends State<DataBrowserScreen> {
           const Text('DATA EXTRACTION MATRIX', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
           const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 2)),
             child: Column(
               children:[
                 DropdownButtonFormField<String>(value: _subFilter, decoration: const InputDecoration(labelText: 'SUBJECT FILTER'), items:[const DropdownMenuItem<String>(value: null, child: Text('ALL')), ...state.availableSubjects.map((s) => DropdownMenuItem(value: s, child: Text(s)))], onChanged: (v) => setState(() => _subFilter = v)),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<Scope>(value: _scopeFilter, decoration: const InputDecoration(labelText: 'SCOPE FILTER'), items:[const DropdownMenuItem<Scope>(value: null, child: Text('ALL')), ...Scope.values.map((s) => DropdownMenuItem(value: s, child: Text(s.name.toUpperCase())))], onChanged: (v) => setState(() => _scopeFilter = v)),
+                const Divider(),
+                CheckboxListTile(title: const Text('INCLUDE SESSIONS'), value: _incSessions, activeColor: inkBlack, onChanged: (v) => setState(() => _incSessions = v ?? false)),
+                CheckboxListTile(title: const Text('INCLUDE REMARKS'), value: _incRemarks, activeColor: inkBlack, onChanged: (v) => setState(() => _incRemarks = v ?? false)),
+                CheckboxListTile(title: const Text('INCLUDE GOALS'), value: _incGoals, activeColor: inkBlack, onChanged: (v) => setState(() => _incGoals = v ?? false)),
+                if (_incGoals) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 32),
+                    child: Row(
+                      children:[
+                        Expanded(child: CheckboxListTile(title: const Text('PENDING'), value: _incPending, activeColor: inkBlack, dense: true, onChanged: (v) => setState(() => _incPending = v ?? false))),
+                        Expanded(child: CheckboxListTile(title: const Text('COMPLETED'), value: _incCompleted, activeColor: steamGreen, dense: true, onChanged: (v) => setState(() => _incCompleted = v ?? false))),
+                        Expanded(child: CheckboxListTile(title: const Text('FAILED'), value: _incFailed, activeColor: rustRed, dense: true, onChanged: (v) => setState(() => _incFailed = v ?? false))),
+                      ],
+                    ),
+                  )
+                ]
               ],
             ),
           ),
           const SizedBox(height: 24),
-          FilledButton.icon(icon: const Icon(Icons.copy), label: const Text('EXECUTE EXTRACTION'), onPressed: () => _copyMatrix(state)),
+          FilledButton.icon(
+              icon: const Icon(Icons.copy),
+              label: const Text('COPY MATRIX TO CLIPBOARD'),
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: generatedText));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('COPIED!')));
+              }),
+          const SizedBox(height: 24),
+          const Text('PREVIEW:', style: TextStyle(fontWeight: FontWeight.bold)),
+          Container(
+            height: 300,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(border: Border.all(color: Colors.black26), color: Colors.white),
+            child: SingleChildScrollView(
+              child: Text(generatedText, style: const TextStyle(fontSize: 10, fontFamily: 'Courier')),
+            ),
+          )
         ],
       ),
     );
@@ -1178,15 +1600,39 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 24),
           const Text('ACCOUNTS', style: TextStyle(fontWeight: FontWeight.bold)),
           ...state.users.map((u) => ListTile(title: Text(u.name), trailing: u.id == user?.id ? const Icon(Icons.check_circle) : OutlinedButton(child: const Text('SWITCH'), onPressed: () => state.switchUser(u.id)))),
-          FilledButton(child: const Text('NEW OPERATOR'), onPressed: () {
-            final c = TextEditingController(); showDialog(context: context, builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[FilledButton(child: const Text('CREATE'), onPressed: () { state.createUser(c.text); Navigator.pop(ctx); })]));
-          }),
+          FilledButton(
+              child: const Text('NEW OPERATOR'),
+              onPressed: () {
+                final c = TextEditingController();
+                showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[
+                          FilledButton(
+                              child: const Text('CREATE'),
+                              onPressed: () {
+                                state.createUser(c.text);
+                                Navigator.pop(ctx);
+                              })
+                        ]));
+              }),
           const SizedBox(height: 24),
           const Text('CUSTOM SUBJECTS', style: TextStyle(fontWeight: FontWeight.bold)),
           if (user != null) ...user.customSubjects.map((s) => ListTile(title: Text(s))),
-          FilledButton(child: const Text('ADD SUBJECT'), onPressed: () {
-            final c = TextEditingController(); showDialog(context: context, builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[FilledButton(child: const Text('ADD'), onPressed: () { state.addCustomSubject(c.text); Navigator.pop(ctx); })]));
-          }),
+          FilledButton(
+              child: const Text('ADD SUBJECT'),
+              onPressed: () {
+                final c = TextEditingController();
+                showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(content: TextField(controller: c), actions:[
+                          FilledButton(
+                              child: const Text('ADD'),
+                              onPressed: () {
+                                state.addCustomSubject(c.text);
+                                Navigator.pop(ctx);
+                              })
+                        ]));
+              }),
         ],
       ),
     );
